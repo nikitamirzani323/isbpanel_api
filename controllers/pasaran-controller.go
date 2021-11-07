@@ -29,6 +29,9 @@ func Pasaranhome(c *fiber.Ctx) error {
 		pasaran_jamjadwal, _ := jsonparser.GetString(value, "pasaran_jamjadwal")
 		pasaran_datekeluaran, _ := jsonparser.GetString(value, "pasaran_datekeluaran")
 		pasaran_keluaran, _ := jsonparser.GetString(value, "pasaran_keluaran")
+		pasaran_dateprediksi, _ := jsonparser.GetString(value, "pasaran_dateprediksi")
+		pasaran_bbfsprediksi, _ := jsonparser.GetString(value, "pasaran_bbfsprediksi")
+		pasaran_nomorprediksi, _ := jsonparser.GetString(value, "pasaran_nomorprediksi")
 
 		obj.Pasaran_id = pasaran_id
 		obj.Pasaran_name = pasaran_name
@@ -37,6 +40,9 @@ func Pasaranhome(c *fiber.Ctx) error {
 		obj.Pasaran_jamjadwal = pasaran_jamjadwal
 		obj.Pasaran_datekeluaran = pasaran_datekeluaran
 		obj.Pasaran_keluaran = pasaran_keluaran
+		obj.Pasaran_dateprediksi = pasaran_dateprediksi
+		obj.Pasaran_bbfsprediksi = pasaran_bbfsprediksi
+		obj.Pasaran_nomorprediksi = pasaran_nomorprediksi
 		arraobj = append(arraobj, obj)
 	})
 	if !flag {

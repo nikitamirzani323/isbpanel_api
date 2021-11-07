@@ -41,7 +41,8 @@ func Fetch_pasaranHome() (helpers.Response, error) {
 		helpers.ErrorCheck(err)
 
 		var (
-			datekeluaran_db, nomorkeluaran_db string
+			datekeluaran_db, nomorkeluaran_db                  string
+			dateprediksi_db, bbfsprediksi_db, nomorprediksi_db string
 		)
 		sql_selectpasaran := `SELECT 
 			datekeluaran , nomorkeluaran
@@ -57,6 +58,20 @@ func Fetch_pasaranHome() (helpers.Response, error) {
 			helpers.ErrorCheck(e_keluaran)
 		}
 
+		sql_selectprediksi := `SELECT 
+			dateprediksi , bbfsprediksi, nomorprediksi
+			FROM ` + config.DB_tbl_trx_prediksi + ` 
+			WHERE idpasarantogel = ? 
+			ORDER BY dateprediksi DESC LIMIT 1
+		`
+		row_prediksi := con.QueryRowContext(ctx, sql_selectprediksi, idpasarantogel_db)
+		switch e_prediksi := row_prediksi.Scan(&dateprediksi_db, &bbfsprediksi_db, &nomorprediksi_db); e_prediksi {
+		case sql.ErrNoRows:
+		case nil:
+		default:
+			helpers.ErrorCheck(e_prediksi)
+		}
+
 		obj.Pasaran_id = idpasarantogel_db
 		obj.Pasaran_name = nmpasarantogel_db
 		obj.Pasaran_url = urlpasaran_db
@@ -64,6 +79,9 @@ func Fetch_pasaranHome() (helpers.Response, error) {
 		obj.Pasaran_jamjadwal = jamjadwal_db
 		obj.Pasaran_datekeluaran = datekeluaran_db
 		obj.Pasaran_keluaran = nomorkeluaran_db
+		obj.Pasaran_dateprediksi = dateprediksi_db
+		obj.Pasaran_bbfsprediksi = bbfsprediksi_db
+		obj.Pasaran_nomorprediksi = nomorprediksi_db
 		arraobj = append(arraobj, obj)
 		msg = "Success"
 	}
