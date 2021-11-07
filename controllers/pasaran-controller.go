@@ -139,37 +139,37 @@ func Keluaranhome(c *fiber.Ctx) error {
 	})
 	jsonparser.ArrayEach(paito_minggu_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		keluaran_nomor, _ := jsonparser.GetString(value, "keluaran_nomor")
-		obj_minggu.Keluaran_nomorminggu = keluaran_nomor
+		obj_minggu.Keluaran_nomor = keluaran_nomor
 		arraobj_minggu = append(arraobj_minggu, obj_minggu)
 	})
 	jsonparser.ArrayEach(paito_senin_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		keluaran_nomor, _ := jsonparser.GetString(value, "keluaran_nomor")
-		obj_senin.Keluaran_nomorsenin = keluaran_nomor
+		obj_senin.Keluaran_nomor = keluaran_nomor
 		arraobj_senin = append(arraobj_senin, obj_senin)
 	})
 	jsonparser.ArrayEach(paito_selasa_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		keluaran_nomor, _ := jsonparser.GetString(value, "keluaran_nomor")
-		obj_selasa.Keluaran_nomorselasa = keluaran_nomor
+		obj_selasa.Keluaran_nomor = keluaran_nomor
 		arraobj_selasa = append(arraobj_selasa, obj_selasa)
 	})
 	jsonparser.ArrayEach(paito_rabu_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		keluaran_nomor, _ := jsonparser.GetString(value, "keluaran_nomor")
-		obj_rabu.Keluaran_nomorrabu = keluaran_nomor
+		obj_rabu.Keluaran_nomor = keluaran_nomor
 		arraobj_rabu = append(arraobj_rabu, obj_rabu)
 	})
 	jsonparser.ArrayEach(paito_kamis_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		keluaran_nomor, _ := jsonparser.GetString(value, "keluaran_nomor")
-		obj_kamis.Keluaran_nomorkamis = keluaran_nomor
+		obj_kamis.Keluaran_nomor = keluaran_nomor
 		arraobj_kamis = append(arraobj_kamis, obj_kamis)
 	})
 	jsonparser.ArrayEach(paito_jumat_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		keluaran_nomor, _ := jsonparser.GetString(value, "keluaran_nomor")
-		obj_jumat.Keluaran_nomorjumat = keluaran_nomor
+		obj_jumat.Keluaran_nomor = keluaran_nomor
 		arraobj_jumat = append(arraobj_jumat, obj_jumat)
 	})
 	jsonparser.ArrayEach(paito_sabtu_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		keluaran_nomor, _ := jsonparser.GetString(value, "keluaran_nomor")
-		obj_sabtu.Keluaran_nomorsabtu = keluaran_nomor
+		obj_sabtu.Keluaran_nomor = keluaran_nomor
 		arraobj_sabtu = append(arraobj_sabtu, obj_sabtu)
 	})
 	if !flag {

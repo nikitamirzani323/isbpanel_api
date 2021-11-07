@@ -149,32 +149,32 @@ func Fetch_keluaran(idpasaran string) (helpers.ResponseKeluaran, error) {
 
 		switch daynowhari {
 		case "minggu":
-			objpaito_minggu.Keluaran_nomorminggu = nomorkeluaran_db
+			objpaito_minggu.Keluaran_nomor = nomorkeluaran_db
+			arraobjpaito_minggu = append(arraobjpaito_minggu, objpaito_minggu)
 		case "senin":
-			objpaito_senin.Keluaran_nomorsenin = nomorkeluaran_db
+			objpaito_senin.Keluaran_nomor = nomorkeluaran_db
+			arraobjpaito_senin = append(arraobjpaito_senin, objpaito_senin)
 		case "selasa":
-			objpaito_selasa.Keluaran_nomorselasa = nomorkeluaran_db
+			objpaito_selasa.Keluaran_nomor = nomorkeluaran_db
+			arraobjpaito_selasa = append(arraobjpaito_selasa, objpaito_selasa)
 		case "rabu":
-			objpaito_rabu.Keluaran_nomorrabu = nomorkeluaran_db
+			objpaito_rabu.Keluaran_nomor = nomorkeluaran_db
+			arraobjpaito_rabu = append(arraobjpaito_rabu, objpaito_rabu)
 		case "kamis":
-			objpaito_kamis.Keluaran_nomorkamis = nomorkeluaran_db
+			objpaito_kamis.Keluaran_nomor = nomorkeluaran_db
+			arraobjpaito_kamis = append(arraobjpaito_kamis, objpaito_kamis)
 		case "jumat":
-			objpaito_jumat.Keluaran_nomorjumat = nomorkeluaran_db
+			objpaito_jumat.Keluaran_nomor = nomorkeluaran_db
+			arraobjpaito_jumat = append(arraobjpaito_jumat, objpaito_jumat)
 		case "sabtu":
-			objpaito_sabtu.Keluaran_nomorsabtu = nomorkeluaran_db
+			objpaito_sabtu.Keluaran_nomor = nomorkeluaran_db
+			arraobjpaito_sabtu = append(arraobjpaito_sabtu, objpaito_sabtu)
 		}
-		arraobjpaito_minggu = append(arraobjpaito_minggu, objpaito_minggu)
-		arraobjpaito_senin = append(arraobjpaito_senin, objpaito_senin)
-		arraobjpaito_selasa = append(arraobjpaito_selasa, objpaito_selasa)
-		arraobjpaito_rabu = append(arraobjpaito_rabu, objpaito_rabu)
-		arraobjpaito_kamis = append(arraobjpaito_kamis, objpaito_kamis)
-		arraobjpaito_jumat = append(arraobjpaito_jumat, objpaito_jumat)
-		arraobjpaito_sabtu = append(arraobjpaito_sabtu, objpaito_sabtu)
 		obj.Keluaran_datekeluaran = datekeluaran_db
 		obj.Keluaran_periode = idpasaran + "-" + periodekeluaran_db
 		obj.Keluaran_nomor = nomorkeluaran_db
 		arraobj = append(arraobj, obj)
-
+		nomorkeluaran_db = ""
 		msg = "Success"
 	}
 	defer row.Close()
