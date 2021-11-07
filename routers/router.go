@@ -14,5 +14,6 @@ func Init() *fiber.App {
 	app.Use(recover.New())
 	app.Use(compress.New())
 	app.Post("/api/pasaran", controllers.Pasaranhome)
+	app.Post("/api/keluaran", controllers.Keluaranhome)
 	return app
 }

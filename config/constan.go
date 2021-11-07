@@ -1,17 +1,16 @@
 package config
 
 const (
-	DB_tbl_counter          string = "tbl_counter"
-	DB_tbl_admin            string = "tbl_admin"
-	DB_tbl_admingroup       string = "tbl_admingroup"
-	DB_tbl_mst_version      string = "tbl_mst_version"
-	DB_tbl_mst_pasaran      string = "tbl_mst_pasaran_togel"
-	DB_tbl_trx_sdsb4d_night string = "tbl_trx_sdsb4d_night"
-	DB_tbl_trx_keluaran     string = "tbl_trx_keluaran"
-	DB_tbl_trx_prediksi     string = "tbl_trx_prediksi"
-	STATUS_RUNNING          string = "background:#FFEB3B;font-weight:bold;color:black;"
-	STATUS_COMPLETE         string = "background:#8BC34A;font-weight:bold;color:black;"
-	STATUS_CANCEL           string = "background:#E91E63;font-weight:bold;color:white;"
+	DB_tbl_counter      string = "tbl_counter"
+	DB_tbl_admin        string = "tbl_admin"
+	DB_tbl_admingroup   string = "tbl_admingroup"
+	DB_tbl_mst_version  string = "tbl_mst_version"
+	DB_tbl_mst_pasaran  string = "tbl_mst_pasaran_togel"
+	DB_tbl_trx_keluaran string = "tbl_trx_keluaran"
+	DB_tbl_trx_prediksi string = "tbl_trx_prediksi"
+	STATUS_RUNNING      string = "background:#FFEB3B;font-weight:bold;color:black;"
+	STATUS_COMPLETE     string = "background:#8BC34A;font-weight:bold;color:black;"
+	STATUS_CANCEL       string = "background:#E91E63;font-weight:bold;color:white;"
 )
 
 const Sourcechar string = `ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 !@#$%^&*()-_=+[]{};:,.<>?/`
