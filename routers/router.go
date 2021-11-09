@@ -16,5 +16,6 @@ func Init() *fiber.App {
 	app.Post("/api/pasaran", controllers.Pasaranhome)
 	app.Post("/api/keluaran", controllers.Keluaranhome)
 	app.Post("/api/news", controllers.Newshome)
+	app.Post("/api/bukumimpi", controllers.Bukumimpihome)
 	return app
 }
