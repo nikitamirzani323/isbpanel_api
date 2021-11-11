@@ -21,11 +21,11 @@ func Fetch_newsHome() (helpers.Response, error) {
 	start := time.Now()
 
 	sql_select := `SELECT 
-			title_news , descp_news, 
-			url_news , img_news 
-			FROM ` + config.DB_tbl_trx_news + ` 
-			ORDER BY idnews DESC LIMIT 50   
-		`
+		title_news , descp_news, 
+		url_news , img_news 
+		FROM ` + config.DB_tbl_trx_news + ` 
+		ORDER BY idnews DESC LIMIT 50   
+	`
 
 	row, err := con.QueryContext(ctx, sql_select)
 	helpers.ErrorCheck(err)

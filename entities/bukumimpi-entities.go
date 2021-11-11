@@ -5,3 +5,10 @@ type Model_bukumimpi struct {
 	Bukumimpi_name  string `json:"bukumimpi_name"`
 	Bukumimpi_nomor string `json:"bukumimpi_nomor"`
 }
+type Model_tafsirmimpi struct {
+	Tafsirmimpi_mimpi     string `json:"tafsirmimpi_mimpi"`
+	Tafsirmimpi_artimimpi string `json:"tafsirmimpi_artimimpi"`
+	Tafsirmimpi_angka2d   string `json:"tafsirmimpi_angka2d"`
+	Tafsirmimpi_angka3d   string `json:"tafsirmimpi_angka3d"`
+	Tafsirmimpi_angka4d   string `json:"tafsirmimpi_angka4d"`
+}
