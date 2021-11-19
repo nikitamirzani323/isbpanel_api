@@ -24,7 +24,7 @@ func Fetch_movieHome() (helpers.Response, error) {
 	sql_selectview := `SELECT 
 		movieid, movietitle , movietype, label, posted_id   
 		FROM ` + config.DB_tbl_trx_movie + ` 
-		ORDER BY views DESC LIMIT 6    
+		ORDER BY views DESC LIMIT 12     
 	`
 	row, err := con.QueryContext(ctx, sql_selectview)
 	helpers.ErrorCheck(err)
@@ -60,7 +60,7 @@ func Fetch_movieHome() (helpers.Response, error) {
 	sql_selectnew := `SELECT 
 		movieid, movietitle , movietype, label, posted_id   
 		FROM ` + config.DB_tbl_trx_movie + ` 
-		ORDER BY createdatemovie DESC LIMIT 6    
+		ORDER BY createdatemovie DESC LIMIT 12     
 	`
 	var objchildbaru entities.Model_movie
 	var arraobjchildbaru []entities.Model_movie
