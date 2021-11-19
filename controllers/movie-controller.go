@@ -77,13 +77,20 @@ func Moviehome(c *fiber.Ctx) error {
 			movie_title, _ := jsonparser.GetString(value, "movie_title")
 			movie_label, _ := jsonparser.GetString(value, "movie_label")
 			movie_thumbnail, _ := jsonparser.GetString(value, "movie_thumbnail")
-			movie_video, _ := jsonparser.GetString(value, "movie_video")
+			movie_video, _, _, _ := jsonparser.Get(value, "movie_video")
+			var objmoviesrc entities.Model_movievideo
+			var arraobjmoviesrc []entities.Model_movievideo
+			jsonparser.ArrayEach(movie_video, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+				movie_src, _ := jsonparser.GetString(value, "movie_src")
+				objmoviesrc.Movie_src = movie_src
+				arraobjmoviesrc = append(arraobjmoviesrc, objmoviesrc)
+			})
 			objchild.Movie_id = int(movie_id)
 			objchild.Movie_type = movie_type
 			objchild.Movie_title = movie_title
 			objchild.Movie_label = movie_label
 			objchild.Movie_thumbnail = movie_thumbnail
-			objchild.Movie_video = movie_video
+			objchild.Movie_video = arraobjmoviesrc
 			arraobjchild = append(arraobjchild, objchild)
 		})
 

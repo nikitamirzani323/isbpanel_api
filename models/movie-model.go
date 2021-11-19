@@ -156,22 +156,27 @@ func _GetMedia(idrecord int) (string, string) {
 	}
 	return url, extension
 }
-func _GetVideo(idrecord int) string {
+func _GetVideo(idrecord int) interface{} {
+	var obj entities.Model_movievideo
+	var arraobj []entities.Model_movievideo
 	con := db.CreateCon()
 	ctx := context.Background()
-	url := ""
 
 	sql_select := `SELECT
 		url   
 		FROM ` + config.DB_tbl_mst_movie_source + `  
 		WHERE poster_id = ? 
 	`
-	row := con.QueryRowContext(ctx, sql_select, idrecord)
-	switch e := row.Scan(&url); e {
-	case sql.ErrNoRows:
-	case nil:
-	default:
-		helpers.ErrorCheck(e)
+	row_select, err_select := con.QueryContext(ctx, sql_select, idrecord)
+	helpers.ErrorCheck(err_select)
+	for row_select.Next() {
+		var url_db string
+
+		err_select = row_select.Scan(&url_db)
+		helpers.ErrorCheck(err_select)
+
+		obj.Movie_src = url_db
+		arraobj = append(arraobj, obj)
 	}
-	return url
+	return arraobj
 }
