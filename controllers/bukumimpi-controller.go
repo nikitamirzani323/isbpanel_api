@@ -14,16 +14,8 @@ import (
 const Field_bukumimpihome_redis = "LISTBUKUMIMPI_FRONTEND_ISBPANEL"
 const Field_tafsirmimpihome_redis = "LISTTAFSIRMIMPI_FRONTEND_ISBPANEL"
 
-type clienrequest struct {
-	Tipe string `json:"tipe"`
-	Nama string `json:"nama"`
-}
-type clientafsirmimpirequest struct {
-	Search string `json:"search"`
-}
-
 func Bukumimpihome(c *fiber.Ctx) error {
-	client := new(clienrequest)
+	client := new(entities.Controller_clienrequest)
 	if err := c.BodyParser(client); err != nil {
 		return err
 	}
@@ -68,7 +60,7 @@ func Bukumimpihome(c *fiber.Ctx) error {
 	}
 }
 func TafsirMimpihome(c *fiber.Ctx) error {
-	client := new(clientafsirmimpirequest)
+	client := new(entities.Controller_clientafsirmimpirequest)
 	if err := c.BodyParser(client); err != nil {
 		return err
 	}

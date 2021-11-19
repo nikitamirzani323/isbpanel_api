@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/buger/jsonparser"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/nikitamirzani323/isbpanel_api/entities"
 	"github.com/nikitamirzani323/isbpanel_api/helpers"
@@ -14,6 +15,47 @@ import (
 const Fieldmovie_home_redis = "LISTMOVIE_FRONTEND_ISBPANEL"
 
 func Moviehome(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_clientmovie)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+	log.Println("Client : ", client.Client_hostname)
+	flag_client := false
+	switch client.Client_hostname {
+	case "167.86.112.29":
+		flag_client = true
+	}
+	if !flag_client {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "NOT REGISTER",
+			"record":  nil,
+		})
+	}
 	var obj entities.Model_moviecategory
 	var arraobj []entities.Model_moviecategory
 	render_page := time.Now()
@@ -58,7 +100,7 @@ func Moviehome(c *fiber.Ctx) error {
 				"record":  nil,
 			})
 		}
-		helpers.SetRedis(Fieldmovie_home_redis, result, time.Minute*60)
+		helpers.SetRedis(Fieldmovie_home_redis, result, time.Minute*120)
 		log.Println("MOVIE MYSQL")
 		return c.JSON(result)
 	} else {

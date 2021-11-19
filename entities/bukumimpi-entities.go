@@ -12,3 +12,11 @@ type Model_tafsirmimpi struct {
 	Tafsirmimpi_angka3d   string `json:"tafsirmimpi_angka3d"`
 	Tafsirmimpi_angka4d   string `json:"tafsirmimpi_angka4d"`
 }
+
+type Controller_clienrequest struct {
+	Tipe string `json:"tipe"`
+	Nama string `json:"nama"`
+}
+type Controller_clientafsirmimpirequest struct {
+	Search string `json:"search"`
+}

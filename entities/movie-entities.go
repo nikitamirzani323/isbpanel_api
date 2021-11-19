@@ -13,3 +13,7 @@ type Model_movie struct {
 	Movie_thumbnail string `json:"movie_thumbnail"`
 	Movie_video     string `json:"movie_video"`
 }
+
+type Controller_clientmovie struct {
+	Client_hostname string `json:"client_hostname" validate:"required"`
+}
