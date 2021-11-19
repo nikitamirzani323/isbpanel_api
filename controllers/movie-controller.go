@@ -47,6 +47,8 @@ func Moviehome(c *fiber.Ctx) error {
 	switch client.Client_hostname {
 	case "167.86.112.29":
 		flag_client = true
+	case "localhost:7075":
+		flag_client = true
 	}
 	if !flag_client {
 		c.Status(fiber.StatusBadRequest)
