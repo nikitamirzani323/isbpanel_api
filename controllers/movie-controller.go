@@ -58,7 +58,7 @@ func Moviehome(c *fiber.Ctx) error {
 				"record":  nil,
 			})
 		}
-		helpers.SetRedis(Fieldmovie_home_redis, result, 0)
+		helpers.SetRedis(Fieldmovie_home_redis, result, time.Minute*60)
 		log.Println("MOVIE MYSQL")
 		return c.JSON(result)
 	} else {

@@ -93,6 +93,42 @@ func Fetch_movieHome() (helpers.Response, error) {
 	obj.Movie_list = arraobjchildbaru
 	arraobj = append(arraobj, obj)
 
+	sql_selectrekomendasi := `SELECT 
+		movieid, movietitle , movietype, label, posted_id   
+		FROM ` + config.DB_tbl_trx_movie + ` 
+		ORDER BY RAND() LIMIT 24      
+	`
+	var objrekomendasi entities.Model_movie
+	var arraobjrekomendasi []entities.Model_movie
+	row_rekomendasi, err_rekomendasi := con.QueryContext(ctx, sql_selectrekomendasi)
+	helpers.ErrorCheck(err_rekomendasi)
+	for row_rekomendasi.Next() {
+		var (
+			movieid_db, posted_id_db              int
+			movietitle_db, movietype_db, label_db string
+		)
+
+		err = row_rekomendasi.Scan(&movieid_db, &movietitle_db, &movietype_db, &label_db, &posted_id_db)
+		helpers.ErrorCheck(err)
+		poster_image, poster_extension := _GetMedia(posted_id_db)
+		path_image := "https://duniafilm.b-cdn.net/uploads/cache/poster_thumb/uploads/" + poster_extension + "/" + poster_image
+		movie_url := _GetVideo(movieid_db)
+
+		objrekomendasi.Movie_id = movieid_db
+		objrekomendasi.Movie_type = movietype_db
+		objrekomendasi.Movie_title = movietitle_db
+		objrekomendasi.Movie_label = label_db
+		objrekomendasi.Movie_thumbnail = path_image
+		objrekomendasi.Movie_video = movie_url
+		arraobjrekomendasi = append(arraobjrekomendasi, objrekomendasi)
+		msg = "Success"
+	}
+	defer row_new.Close()
+	obj.Movie_idcategory = "rekomendasi"
+	obj.Movie_category = "Rekomendasi"
+	obj.Movie_list = arraobjrekomendasi
+	arraobj = append(arraobj, obj)
+
 	res.Status = fiber.StatusOK
 	res.Message = msg
 	res.Record = arraobj
