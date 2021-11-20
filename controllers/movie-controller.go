@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/buger/jsonparser"
-	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/nikitamirzani323/isbpanel_api/entities"
 	"github.com/nikitamirzani323/isbpanel_api/helpers"
 	"github.com/nikitamirzani323/isbpanel_api/models"
@@ -15,36 +15,13 @@ import (
 const Fieldmovie_home_redis = "LISTMOVIE_FRONTEND_ISBPANEL"
 
 func Moviehome(c *fiber.Ctx) error {
-	var errors []*helpers.ErrorResponse
-	client := new(entities.Controller_clientmovie)
-	validate := validator.New()
-	if err := c.BodyParser(client); err != nil {
-		c.Status(fiber.StatusBadRequest)
-		return c.JSON(fiber.Map{
-			"status":  fiber.StatusBadRequest,
-			"message": err.Error(),
-			"record":  nil,
-		})
-	}
-
-	err := validate.Struct(client)
-	if err != nil {
-		for _, err := range err.(validator.ValidationErrors) {
-			var element helpers.ErrorResponse
-			element.Field = err.StructField()
-			element.Tag = err.Tag()
-			errors = append(errors, &element)
-		}
-		c.Status(fiber.StatusBadRequest)
-		return c.JSON(fiber.Map{
-			"status":  fiber.StatusBadRequest,
-			"message": "validation",
-			"record":  errors,
-		})
-	}
-	log.Println("Client : ", client.Client_hostname)
+	user := c.Locals("jwt").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	temp_decp := helpers.Decryption(name)
+	log.Println("Client : ", temp_decp)
 	flag_client := false
-	switch client.Client_hostname {
+	switch temp_decp {
 	case "167.86.112.29":
 		flag_client = true
 	case "localhost:7075":

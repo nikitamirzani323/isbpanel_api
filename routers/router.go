@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/nikitamirzani323/isbpanel_api/controllers"
+	"github.com/nikitamirzani323/isbpanel_api/middleware"
 )
 
 func Init() *fiber.App {
@@ -13,6 +14,8 @@ func Init() *fiber.App {
 	app.Use(logger.New())
 	app.Use(recover.New())
 	app.Use(compress.New())
+	app.Post("/api/init", controllers.CheckLogin)
+	app.Post("/api/home", middleware.JWTProtected(), controllers.Home)
 	app.Post("/api/pasaran", controllers.Pasaranhome)
 	app.Post("/api/keluaran", controllers.Keluaranhome)
 	app.Post("/api/news", controllers.Newshome)
