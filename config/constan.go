@@ -15,6 +15,7 @@ const (
 	DB_tbl_trx_news         string = "tbl_trx_news"
 	DB_tbl_trx_bukumimpi    string = "tbl_trx_bukumimpi2"
 	DB_tbl_trx_movie        string = "tbl_trx_movie"
+	DB_tbl_trx_rate         string = "tbl_trx_rate"
 	STATUS_RUNNING          string = "background:#FFEB3B;font-weight:bold;color:black;"
 	STATUS_COMPLETE         string = "background:#8BC34A;font-weight:bold;color:black;"
 	STATUS_CANCEL           string = "background:#E91E63;font-weight:bold;color:white;"

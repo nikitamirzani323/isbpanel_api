@@ -21,6 +21,52 @@ func Fetch_movieHome() (helpers.Response, error) {
 	ctx := context.Background()
 	start := time.Now()
 
+	sql_toprated := `SELECT 
+		SUM(A.ratingposter) as total, 
+		B.movieid, B.movietitle , B.movietype, B.label, COALESCE(B.posted_id,0) , B.urlthumbnail  
+		FROM ` + config.DB_tbl_trx_rate + ` as A 
+		JOIN ` + config.DB_tbl_trx_movie + ` as B ON B.movieid = A.idposter 
+		WHERE B.enabled = 1 
+		GROUP BY A.idposter 
+		ORDER BY total DESC LIMIT 24     
+	`
+	row_toprated, err_toprated := con.QueryContext(ctx, sql_toprated)
+	helpers.ErrorCheck(err_toprated)
+	var objtoprated entities.Model_movie
+	var arratoprated []entities.Model_movie
+	for row_toprated.Next() {
+		var (
+			movieid_db, posted_id_db, total_db                     int
+			movietitle_db, movietype_db, label_db, urlthumbnail_db string
+		)
+
+		err := row_toprated.Scan(&total_db, &movieid_db, &movietitle_db, &movietype_db, &label_db, &posted_id_db, &urlthumbnail_db)
+		helpers.ErrorCheck(err)
+		path_image := ""
+		if urlthumbnail_db == "" {
+			poster_image, poster_extension := _GetMedia(posted_id_db)
+			path_image = "https://duniafilm.b-cdn.net/uploads/cache/poster_thumb/uploads/" + poster_extension + "/" + poster_image
+		} else {
+			path_image = urlthumbnail_db
+		}
+
+		movie_url := _GetVideo(movieid_db)
+
+		objtoprated.Movie_id = movieid_db
+		objtoprated.Movie_type = movietype_db
+		objtoprated.Movie_title = movietitle_db
+		objtoprated.Movie_label = label_db
+		objtoprated.Movie_thumbnail = path_image
+		objtoprated.Movie_video = movie_url
+		arratoprated = append(arratoprated, objtoprated)
+		msg = "Success"
+	}
+	defer row_toprated.Close()
+	obj.Movie_idcategory = "toprated"
+	obj.Movie_category = "Top Rated"
+	obj.Movie_list = arratoprated
+	arraobj = append(arraobj, obj)
+
 	sql_selectview := `SELECT 
 		movieid, movietitle , movietype, label, COALESCE(posted_id,0) , urlthumbnail    
 		FROM ` + config.DB_tbl_trx_movie + ` 
