@@ -22,8 +22,9 @@ func Fetch_movieHome() (helpers.Response, error) {
 	start := time.Now()
 
 	sql_selectview := `SELECT 
-		movieid, movietitle , movietype, label, posted_id   
+		movieid, movietitle , movietype, label, COALESCE(posted_id,0) , urlthumbnail    
 		FROM ` + config.DB_tbl_trx_movie + ` 
+		WHERE enabled = 1 
 		ORDER BY views DESC LIMIT 24     
 	`
 	row, err := con.QueryContext(ctx, sql_selectview)
@@ -32,14 +33,20 @@ func Fetch_movieHome() (helpers.Response, error) {
 	var arraobjpopular []entities.Model_movie
 	for row.Next() {
 		var (
-			movieid_db, posted_id_db              int
-			movietitle_db, movietype_db, label_db string
+			movieid_db, posted_id_db                               int
+			movietitle_db, movietype_db, label_db, urlthumbnail_db string
 		)
 
-		err = row.Scan(&movieid_db, &movietitle_db, &movietype_db, &label_db, &posted_id_db)
+		err = row.Scan(&movieid_db, &movietitle_db, &movietype_db, &label_db, &posted_id_db, &urlthumbnail_db)
 		helpers.ErrorCheck(err)
-		poster_image, poster_extension := _GetMedia(posted_id_db)
-		path_image := "https://duniafilm.b-cdn.net/uploads/cache/poster_thumb/uploads/" + poster_extension + "/" + poster_image
+		path_image := ""
+		if urlthumbnail_db == "" {
+			poster_image, poster_extension := _GetMedia(posted_id_db)
+			path_image = "https://duniafilm.b-cdn.net/uploads/cache/poster_thumb/uploads/" + poster_extension + "/" + poster_image
+		} else {
+			path_image = urlthumbnail_db
+		}
+
 		movie_url := _GetVideo(movieid_db)
 
 		objpopular.Movie_id = movieid_db
@@ -58,8 +65,9 @@ func Fetch_movieHome() (helpers.Response, error) {
 	arraobj = append(arraobj, obj)
 
 	sql_selectnew := `SELECT 
-		movieid, movietitle , movietype, label, posted_id   
+		movieid, movietitle , movietype, label, COALESCE(posted_id,0) , urlthumbnail 
 		FROM ` + config.DB_tbl_trx_movie + ` 
+		WHERE enabled = 1 
 		ORDER BY createdatemovie DESC LIMIT 24	     
 	`
 	var objchildbaru entities.Model_movie
@@ -68,14 +76,19 @@ func Fetch_movieHome() (helpers.Response, error) {
 	helpers.ErrorCheck(err_new)
 	for row_new.Next() {
 		var (
-			movieid_db, posted_id_db              int
-			movietitle_db, movietype_db, label_db string
+			movieid_db, posted_id_db                               int
+			movietitle_db, movietype_db, label_db, urlthumbnail_db string
 		)
 
-		err = row_new.Scan(&movieid_db, &movietitle_db, &movietype_db, &label_db, &posted_id_db)
+		err = row_new.Scan(&movieid_db, &movietitle_db, &movietype_db, &label_db, &posted_id_db, &urlthumbnail_db)
 		helpers.ErrorCheck(err)
-		poster_image, poster_extension := _GetMedia(posted_id_db)
-		path_image := "https://duniafilm.b-cdn.net/uploads/cache/poster_thumb/uploads/" + poster_extension + "/" + poster_image
+		path_image := ""
+		if urlthumbnail_db == "" {
+			poster_image, poster_extension := _GetMedia(posted_id_db)
+			path_image = "https://duniafilm.b-cdn.net/uploads/cache/poster_thumb/uploads/" + poster_extension + "/" + poster_image
+		} else {
+			path_image = urlthumbnail_db
+		}
 		movie_url := _GetVideo(movieid_db)
 
 		objchildbaru.Movie_id = movieid_db
@@ -94,9 +107,10 @@ func Fetch_movieHome() (helpers.Response, error) {
 	arraobj = append(arraobj, obj)
 
 	sql_selectrekomendasi := `SELECT 
-		movieid, movietitle , movietype, label, posted_id   
+		movieid, movietitle , movietype, label, COALESCE(posted_id,0) , urlthumbnail    
 		FROM ` + config.DB_tbl_trx_movie + ` 
-		ORDER BY RAND() LIMIT 48      
+		WHERE enabled = 1 
+		ORDER BY RAND() LIMIT 72       
 	`
 	var objrekomendasi entities.Model_movie
 	var arraobjrekomendasi []entities.Model_movie
@@ -104,14 +118,20 @@ func Fetch_movieHome() (helpers.Response, error) {
 	helpers.ErrorCheck(err_rekomendasi)
 	for row_rekomendasi.Next() {
 		var (
-			movieid_db, posted_id_db              int
-			movietitle_db, movietype_db, label_db string
+			movieid_db, posted_id_db                               int
+			movietitle_db, movietype_db, label_db, urlthumbnail_db string
 		)
 
-		err = row_rekomendasi.Scan(&movieid_db, &movietitle_db, &movietype_db, &label_db, &posted_id_db)
+		err = row_rekomendasi.Scan(&movieid_db, &movietitle_db, &movietype_db, &label_db, &posted_id_db, &urlthumbnail_db)
 		helpers.ErrorCheck(err)
-		poster_image, poster_extension := _GetMedia(posted_id_db)
-		path_image := "https://duniafilm.b-cdn.net/uploads/cache/poster_thumb/uploads/" + poster_extension + "/" + poster_image
+		path_image := ""
+		if urlthumbnail_db == "" {
+			poster_image, poster_extension := _GetMedia(posted_id_db)
+			path_image = "https://duniafilm.b-cdn.net/uploads/cache/poster_thumb/uploads/" + poster_extension + "/" + poster_image
+		} else {
+			path_image = urlthumbnail_db
+		}
+
 		movie_url := _GetVideo(movieid_db)
 
 		objrekomendasi.Movie_id = movieid_db
