@@ -68,7 +68,7 @@ func Fetch_newsMovieHome() (helpers.Response, error) {
 		title_news , descp_news, 
 		url_news , img_news 
 		FROM ` + config.DB_tbl_trx_news + ` 
-		WHERE idcatenews == '2112'  
+		WHERE idcatenews = '2112'  
 		ORDER BY idnews DESC LIMIT 50   
 	`
 
