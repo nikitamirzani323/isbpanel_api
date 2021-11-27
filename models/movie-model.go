@@ -202,6 +202,85 @@ func Fetch_movieHome() (helpers.Response, error) {
 
 	return res, nil
 }
+func SeasonMovie(idmovie int) (helpers.Response, error) {
+	var obj entities.Model_movieseason
+	var arraobj []entities.Model_movieseason
+	var res helpers.Response
+	msg := "Data Not Found"
+	con := db.CreateCon()
+	ctx := context.Background()
+	start := time.Now()
+
+	sql_season := `SELECT 
+		id, title   
+		FROM ` + config.DB_tbl_mst_series_season + ` 
+		WHERE poster_id=?  
+		ORDER BY position ASC      
+	`
+	row, err := con.QueryContext(ctx, sql_season, idmovie)
+	helpers.ErrorCheck(err)
+	for row.Next() {
+		var (
+			id_db    int
+			title_db string
+		)
+
+		err = row.Scan(&id_db, &title_db)
+		helpers.ErrorCheck(err)
+
+		obj.Season_id = id_db
+		obj.Season_title = title_db
+		arraobj = append(arraobj, obj)
+		msg = "Success"
+	}
+
+	res.Status = fiber.StatusOK
+	res.Message = msg
+	res.Record = arraobj
+	res.Time = time.Since(start).String()
+
+	return res, nil
+}
+func EpisodeMovie(idseason int) (helpers.Response, error) {
+	var obj entities.Model_movieepisode
+	var arraobj []entities.Model_movieepisode
+	var res helpers.Response
+	msg := "Data Not Found"
+	con := db.CreateCon()
+	ctx := context.Background()
+	start := time.Now()
+
+	sql_season := `SELECT 
+		id, title   
+		FROM ` + config.DB_tbl_mst_series_episode + ` 
+		WHERE season_id=?  
+		ORDER BY position ASC      
+	`
+	row, err := con.QueryContext(ctx, sql_season, idseason)
+	helpers.ErrorCheck(err)
+	for row.Next() {
+		var (
+			id_db    int
+			title_db string
+		)
+
+		err = row.Scan(&id_db, &title_db)
+		helpers.ErrorCheck(err)
+
+		obj.Episode_id = id_db
+		obj.Episode_title = title_db
+		obj.Episode_src = _GetVideoEpisode(id_db)
+		arraobj = append(arraobj, obj)
+		msg = "Success"
+	}
+
+	res.Status = fiber.StatusOK
+	res.Message = msg
+	res.Record = arraobj
+	res.Time = time.Since(start).String()
+
+	return res, nil
+}
 func _GetMedia(idrecord int) (string, string) {
 	con := db.CreateCon()
 	ctx := context.Background()
@@ -245,4 +324,23 @@ func _GetVideo(idrecord int) interface{} {
 		arraobj = append(arraobj, obj)
 	}
 	return arraobj
+}
+func _GetVideoEpisode(idrecord int) string {
+	con := db.CreateCon()
+	ctx := context.Background()
+	url := ""
+
+	sql_select := `SELECT
+		url   
+		FROM ` + config.DB_tbl_mst_movie_source + `  
+		WHERE episode_id = ? 
+	`
+	row := con.QueryRowContext(ctx, sql_select, idrecord)
+	switch e := row.Scan(&url); e {
+	case sql.ErrNoRows:
+	case nil:
+	default:
+		helpers.ErrorCheck(e)
+	}
+	return url
 }

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/buger/jsonparser"
@@ -14,6 +15,8 @@ import (
 )
 
 const Fieldmovie_home_redis = "LISTMOVIE_FRONTEND_ISBPANEL"
+const Fieldseason_home_redis = "LISTSEASON_FRONTEND_ISBPANEL"
+const Fieldepisode_home_redis = "LISTEPISODE_FRONTEND_ISBPANEL"
 
 func Moviehome(c *fiber.Ctx) error {
 	var errors []*helpers.ErrorResponse
@@ -124,6 +127,190 @@ func Moviehome(c *fiber.Ctx) error {
 		return c.JSON(result)
 	} else {
 		log.Println("MOVIE CACHE")
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusOK,
+			"message": message_RD,
+			"record":  arraobj,
+			"time":    time.Since(render_page).String(),
+		})
+	}
+}
+func Movieseason(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_season)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+	user := c.Locals("jwt").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	temp_decp := helpers.Decryption(name)
+	log.Println("Client TOKEN : ", temp_decp)
+	log.Println("Client BODYPARSE : ", client.Client_hostname)
+	flag_client := false
+	switch temp_decp {
+	case "167.86.112.29":
+		flag_client = true
+	case "localhost:7075":
+		flag_client = true
+	}
+	if temp_decp != client.Client_hostname {
+		flag_client = false
+	}
+	if !flag_client {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "NOT REGISTER",
+			"record":  nil,
+		})
+	}
+
+	var obj entities.Model_movieseason
+	var arraobj []entities.Model_movieseason
+	render_page := time.Now()
+	resultredis, flag := helpers.GetRedis(Fieldseason_home_redis + "_" + strconv.Itoa(client.Movie_id))
+	jsonredis := []byte(resultredis)
+	message_RD, _ := jsonparser.GetString(jsonredis, "message")
+	record_RD, _, _, _ := jsonparser.Get(jsonredis, "record")
+	jsonparser.ArrayEach(record_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		season_id, _ := jsonparser.GetInt(value, "season_id")
+		season_title, _ := jsonparser.GetString(value, "season_title")
+
+		obj.Season_id = int(season_id)
+		obj.Season_title = season_title
+		arraobj = append(arraobj, obj)
+	})
+	if !flag {
+		result, err := models.SeasonMovie(client.Movie_id)
+		if err != nil {
+			c.Status(fiber.StatusBadRequest)
+			return c.JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": err.Error(),
+				"record":  nil,
+			})
+		}
+		helpers.SetRedis(Fieldseason_home_redis+"_"+strconv.Itoa(client.Movie_id), result, time.Minute*1)
+		log.Println("MOVIE SEASON MYSQL")
+		return c.JSON(result)
+	} else {
+		log.Println("MOVIE SEASON CACHE")
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusOK,
+			"message": message_RD,
+			"record":  arraobj,
+			"time":    time.Since(render_page).String(),
+		})
+	}
+}
+func Movieepisode(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_episode)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+	user := c.Locals("jwt").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	temp_decp := helpers.Decryption(name)
+	log.Println("Client TOKEN : ", temp_decp)
+	log.Println("Client BODYPARSE : ", client.Client_hostname)
+	flag_client := false
+	switch temp_decp {
+	case "167.86.112.29":
+		flag_client = true
+	case "localhost:7075":
+		flag_client = true
+	}
+	if temp_decp != client.Client_hostname {
+		flag_client = false
+	}
+	if !flag_client {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "NOT REGISTER",
+			"record":  nil,
+		})
+	}
+
+	var obj entities.Model_movieepisode
+	var arraobj []entities.Model_movieepisode
+	render_page := time.Now()
+	resultredis, flag := helpers.GetRedis(Fieldepisode_home_redis + "_" + strconv.Itoa(client.Season_id))
+	jsonredis := []byte(resultredis)
+	message_RD, _ := jsonparser.GetString(jsonredis, "message")
+	record_RD, _, _, _ := jsonparser.Get(jsonredis, "record")
+	jsonparser.ArrayEach(record_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		episode_id, _ := jsonparser.GetInt(value, "episode_id")
+		episode_title, _ := jsonparser.GetString(value, "episode_title")
+		episode_src, _ := jsonparser.GetString(value, "episode_src")
+
+		obj.Episode_id = int(episode_id)
+		obj.Episode_title = episode_title
+		obj.Episode_src = episode_src
+		arraobj = append(arraobj, obj)
+	})
+	if !flag {
+		result, err := models.EpisodeMovie(client.Season_id)
+		if err != nil {
+			c.Status(fiber.StatusBadRequest)
+			return c.JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": err.Error(),
+				"record":  nil,
+			})
+		}
+		helpers.SetRedis(Fieldepisode_home_redis+"_"+strconv.Itoa(client.Season_id), result, time.Minute*1)
+		log.Println("MOVIE SEASON MYSQL")
+		return c.JSON(result)
+	} else {
+		log.Println("MOVIE SEASON CACHE")
 		return c.JSON(fiber.Map{
 			"status":  fiber.StatusOK,
 			"message": message_RD,
