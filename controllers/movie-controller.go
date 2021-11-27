@@ -58,6 +58,8 @@ func Moviehome(c *fiber.Ctx) error {
 		flag_client = true
 	case "localhost:7075":
 		flag_client = true
+	case "isbfilm.xyz":
+		flag_client = true
 	}
 	if temp_decp != client.Client_hostname {
 		flag_client = false
@@ -175,6 +177,8 @@ func Movieseason(c *fiber.Ctx) error {
 		flag_client = true
 	case "localhost:7075":
 		flag_client = true
+	case "isbfilm.xyz":
+		flag_client = true
 	}
 	if temp_decp != client.Client_hostname {
 		flag_client = false
@@ -265,6 +269,8 @@ func Movieepisode(c *fiber.Ctx) error {
 	case "167.86.112.29":
 		flag_client = true
 	case "localhost:7075":
+		flag_client = true
+	case "isbfilm.xyz":
 		flag_client = true
 	}
 	if temp_decp != client.Client_hostname {
