@@ -52,18 +52,8 @@ func Moviehome(c *fiber.Ctx) error {
 	temp_decp := helpers.Decryption(name)
 	log.Println("Client TOKEN : ", temp_decp)
 	log.Println("Client BODYPARSE : ", client.Client_hostname)
-	flag_client := false
-	switch temp_decp {
-	case "167.86.112.29":
-		flag_client = true
-	case "localhost:7075":
-		flag_client = true
-	case "isbfilm.xyz":
-		flag_client = true
-	}
-	if temp_decp != client.Client_hostname {
-		flag_client = false
-	}
+
+	flag_client := models.Get_Domain(temp_decp)
 
 	if !flag_client {
 		c.Status(fiber.StatusBadRequest)
@@ -171,18 +161,7 @@ func Movieseason(c *fiber.Ctx) error {
 	temp_decp := helpers.Decryption(name)
 	log.Println("Client TOKEN : ", temp_decp)
 	log.Println("Client BODYPARSE : ", client.Client_hostname)
-	flag_client := false
-	switch temp_decp {
-	case "167.86.112.29":
-		flag_client = true
-	case "localhost:7075":
-		flag_client = true
-	case "isbfilm.xyz":
-		flag_client = true
-	}
-	if temp_decp != client.Client_hostname {
-		flag_client = false
-	}
+	flag_client := models.Get_Domain(temp_decp)
 	if !flag_client {
 		c.Status(fiber.StatusBadRequest)
 		return c.JSON(fiber.Map{
@@ -264,18 +243,7 @@ func Movieepisode(c *fiber.Ctx) error {
 	temp_decp := helpers.Decryption(name)
 	log.Println("Client TOKEN : ", temp_decp)
 	log.Println("Client BODYPARSE : ", client.Client_hostname)
-	flag_client := false
-	switch temp_decp {
-	case "167.86.112.29":
-		flag_client = true
-	case "localhost:7075":
-		flag_client = true
-	case "isbfilm.xyz":
-		flag_client = true
-	}
-	if temp_decp != client.Client_hostname {
-		flag_client = false
-	}
+	flag_client := models.Get_Domain(temp_decp)
 	if !flag_client {
 		c.Status(fiber.StatusBadRequest)
 		return c.JSON(fiber.Map{
