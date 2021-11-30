@@ -50,7 +50,7 @@ func Fetch_movieHome() (helpers.Response, error) {
 			path_image = urlthumbnail_db
 		}
 
-		movie_url := _GetVideo(movieid_db)
+		movie_url, _ := _GetVideo(movieid_db)
 
 		objtoprated.Movie_id = movieid_db
 		objtoprated.Movie_type = movietype_db
@@ -93,7 +93,7 @@ func Fetch_movieHome() (helpers.Response, error) {
 			path_image = urlthumbnail_db
 		}
 
-		movie_url := _GetVideo(movieid_db)
+		movie_url, _ := _GetVideo(movieid_db)
 
 		objpopular.Movie_id = movieid_db
 		objpopular.Movie_type = movietype_db
@@ -135,7 +135,7 @@ func Fetch_movieHome() (helpers.Response, error) {
 		} else {
 			path_image = urlthumbnail_db
 		}
-		movie_url := _GetVideo(movieid_db)
+		movie_url, _ := _GetVideo(movieid_db)
 
 		objchildbaru.Movie_id = movieid_db
 		objchildbaru.Movie_type = movietype_db
@@ -178,7 +178,7 @@ func Fetch_movieHome() (helpers.Response, error) {
 			path_image = urlthumbnail_db
 		}
 
-		movie_url := _GetVideo(movieid_db)
+		movie_url, _ := _GetVideo(movieid_db)
 
 		objrekomendasi.Movie_id = movieid_db
 		objrekomendasi.Movie_type = movietype_db
@@ -281,6 +281,87 @@ func EpisodeMovie(idseason int) (helpers.Response, error) {
 
 	return res, nil
 }
+
+//MOBILE
+func Fetch_movielist() (helpers.Response, error) {
+	var obj entities.Model_movielist
+	var arraobj []entities.Model_movielist
+	var res helpers.Response
+	msg := "Data Not Found"
+	con := db.CreateCon()
+	ctx := context.Background()
+	start := time.Now()
+
+	sql_select := `SELECT 
+		movieid, posted_id, movietitle, movietype, year, views, urlthumbnail, label, description 
+		FROM ` + config.DB_VIEW_MOVIE + ` 
+		ORDER BY RAND() DESC LIMIT 300      
+	`
+	row, err := con.QueryContext(ctx, sql_select)
+	helpers.ErrorCheck(err)
+
+	for row.Next() {
+		var (
+			movieid_db, posted_id_db, year_db, views_db                            int
+			movietitle_db, movietype_db, label_db, urlthumbnail_db, description_db string
+		)
+
+		err := row.Scan(&movieid_db, &posted_id_db, &movietitle_db, &movietype_db, &year_db, &views_db,
+			&urlthumbnail_db, &label_db, &description_db)
+		helpers.ErrorCheck(err)
+		path_image := ""
+		if urlthumbnail_db == "" {
+			poster_image, poster_extension := _GetMedia(posted_id_db)
+			path_image = "https://duniafilm.b-cdn.net/uploads/cache/poster_thumb/uploads/" + poster_extension + "/" + poster_image
+		} else {
+			path_image = urlthumbnail_db
+		}
+		var totalsource int = 0
+		movie_url, totalsource := _GetVideo(movieid_db)
+
+		sql_selectgenre := `SELECT 
+			A.idgenre, B.nmgenre 
+			FROM ` + config.DB_tbl_trx_moviegenre + ` as A 
+			JOIN ` + config.DB_tbl_mst_movie_genre + ` as B  ON B.idgenre = A.idgenre
+			WHERE movieid=?
+		`
+		genre := ""
+		row_genre, err_genre := con.QueryContext(ctx, sql_selectgenre, movieid_db)
+		helpers.ErrorCheck(err_genre)
+		for row_genre.Next() {
+			var (
+				idgenre_db int
+				nmgenre_db string
+			)
+			err := row_genre.Scan(&idgenre_db, &nmgenre_db)
+			helpers.ErrorCheck(err)
+			genre = genre + "," + nmgenre_db
+		}
+
+		obj.Movie_id = movieid_db
+		obj.Movie_type = movietype_db
+		obj.Movie_title = movietitle_db
+		obj.Movie_label = label_db
+		obj.Movie_descp = description_db
+		obj.Movie_genre = genre
+		obj.Movie_year = year_db
+		obj.Movie_view = views_db
+		obj.Movie_img = path_image
+		obj.Movie_totalsource = totalsource
+		obj.Movie_video = movie_url
+		arraobj = append(arraobj, obj)
+		msg = "Success"
+	}
+	defer row.Close()
+
+	res.Status = fiber.StatusOK
+	res.Message = msg
+	res.Record = arraobj
+	res.Time = time.Since(start).String()
+
+	return res, nil
+}
+
 func _GetMedia(idrecord int) (string, string) {
 	con := db.CreateCon()
 	ctx := context.Background()
@@ -301,12 +382,12 @@ func _GetMedia(idrecord int) (string, string) {
 	}
 	return url, extension
 }
-func _GetVideo(idrecord int) interface{} {
+func _GetVideo(idrecord int) (interface{}, int) {
 	var obj entities.Model_movievideo
 	var arraobj []entities.Model_movievideo
 	con := db.CreateCon()
 	ctx := context.Background()
-
+	totalsource := 0
 	sql_select := `SELECT
 		url   
 		FROM ` + config.DB_tbl_mst_movie_source + `  
@@ -315,6 +396,7 @@ func _GetVideo(idrecord int) interface{} {
 	row_select, err_select := con.QueryContext(ctx, sql_select, idrecord)
 	helpers.ErrorCheck(err_select)
 	for row_select.Next() {
+		totalsource = totalsource + 1
 		var url_db string
 
 		err_select = row_select.Scan(&url_db)
@@ -323,7 +405,7 @@ func _GetVideo(idrecord int) interface{} {
 		obj.Movie_src = url_db
 		arraobj = append(arraobj, obj)
 	}
-	return arraobj
+	return arraobj, totalsource
 }
 func _GetVideoEpisode(idrecord int) string {
 	con := db.CreateCon()

@@ -26,6 +26,22 @@ type Model_movieepisode struct {
 	Episode_title string `json:"episode_title"`
 	Episode_src   string `json:"episode_src"`
 }
+
+//MOBILE
+type Model_movielist struct {
+	Movie_id          int         `json:"movie_id"`
+	Movie_type        string      `json:"movie_type"`
+	Movie_title       string      `json:"movie_title"`
+	Movie_label       string      `json:"movie_label"`
+	Movie_descp       string      `json:"movie_descp"`
+	Movie_year        int         `json:"movie_year"`
+	Movie_view        int         `json:"movie_view"`
+	Movie_img         string      `json:"movie_img"`
+	Movie_genre       string      `json:"movie_genre"`
+	Movie_totalsource int         `json:"movie_totalsource"`
+	Movie_video       interface{} `json:"movie_video"`
+}
+
 type Controller_clientmovie struct {
 	Client_hostname string `json:"client_hostname" validate:"required"`
 }
