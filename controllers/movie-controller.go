@@ -298,10 +298,38 @@ func Movieepisode(c *fiber.Ctx) error {
 
 //MOBILE
 func Moviemobile(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_clientmobilemovie)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+
 	var obj entities.Model_movielist
 	var arraobj []entities.Model_movielist
 	render_page := time.Now()
-	resultredis, flag := helpers.GetRedis(Fieldmovie_mobile_redis)
+	resultredis, flag := helpers.GetRedis(Fieldmovie_mobile_redis + "_" + client.Client_type)
 	jsonredis := []byte(resultredis)
 	message_RD, _ := jsonparser.GetString(jsonredis, "message")
 	record_RD, _, _, _ := jsonparser.Get(jsonredis, "record")
@@ -340,7 +368,7 @@ func Moviemobile(c *fiber.Ctx) error {
 		arraobj = append(arraobj, obj)
 	})
 	if !flag {
-		result, err := models.Fetch_movielist()
+		result, err := models.Fetch_movielist(client.Client_type)
 		if err != nil {
 			c.Status(fiber.StatusBadRequest)
 			return c.JSON(fiber.Map{
@@ -349,7 +377,7 @@ func Moviemobile(c *fiber.Ctx) error {
 				"record":  nil,
 			})
 		}
-		helpers.SetRedis(Fieldmovie_mobile_redis, result, time.Minute*120)
+		helpers.SetRedis(Fieldmovie_mobile_redis+"_"+client.Client_type, result, time.Minute*120)
 		log.Println("MOVIE MOBILE MYSQL")
 		return c.JSON(result)
 	} else {

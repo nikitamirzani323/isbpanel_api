@@ -283,7 +283,7 @@ func EpisodeMovie(idseason int) (helpers.Response, error) {
 }
 
 //MOBILE
-func Fetch_movielist() (helpers.Response, error) {
+func Fetch_movielist(tipe string) (helpers.Response, error) {
 	var obj entities.Model_movielist
 	var arraobj []entities.Model_movielist
 	var res helpers.Response
@@ -292,11 +292,16 @@ func Fetch_movielist() (helpers.Response, error) {
 	ctx := context.Background()
 	start := time.Now()
 
-	sql_select := `SELECT 
-		movieid, posted_id, movietitle, movietype, year, views, urlthumbnail, label, description 
-		FROM ` + config.DB_VIEW_MOVIE + ` 
-		ORDER BY RAND() DESC LIMIT 300      
-	`
+	sql_select := ""
+	sql_select += "SELECT "
+	sql_select += "movieid, posted_id, movietitle, movietype, year, views, urlthumbnail, label, description "
+	if tipe == "movie" {
+		sql_select += "FROM " + config.DB_VIEW_MOVIE + " "
+	} else {
+		sql_select += "FROM " + config.DB_VIEW_MOVIESERIES + " "
+	}
+	sql_select += "ORDER BY RAND() DESC LIMIT 300 "
+
 	row, err := con.QueryContext(ctx, sql_select)
 	helpers.ErrorCheck(err)
 

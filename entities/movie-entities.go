@@ -53,3 +53,7 @@ type Controller_episode struct {
 	Client_hostname string `json:"client_hostname" validate:"required"`
 	Season_id       int    `json:"season_id" validate:"required"`
 }
+
+type Controller_clientmobilemovie struct {
+	Client_type string `json:"type" form:"type" validate:"required"`
+}
