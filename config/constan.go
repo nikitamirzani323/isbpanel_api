@@ -18,6 +18,7 @@ const (
 	DB_tbl_trx_news           string = "tbl_trx_news"
 	DB_tbl_trx_bukumimpi      string = "tbl_trx_bukumimpi2"
 	DB_tbl_trx_movie          string = "tbl_trx_movie"
+	DB_tbl_trx_slide          string = "tbl_trx_slide"
 	DB_tbl_trx_rate           string = "tbl_trx_rate"
 	DB_tbl_trx_user           string = "tbl_mst_user"
 	DB_tbl_trx_moviegenre     string = "tbl_trx_moviegenre"

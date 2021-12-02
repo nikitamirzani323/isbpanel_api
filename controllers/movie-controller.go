@@ -19,6 +19,7 @@ const Fieldseason_home_redis = "LISTSEASON_FRONTEND_ISBPANEL"
 const Fieldepisode_home_redis = "LISTEPISODE_FRONTEND_ISBPANEL"
 
 const Fieldmovie_mobile_redis = "LISTMOVIE-MOBILE"
+const Fieldfrontpagemovie_mobile_redis = "LISTFRONTPAGE-MOBILE"
 
 func Moviehome(c *fiber.Ctx) error {
 	var errors []*helpers.ErrorResponse
@@ -342,29 +343,15 @@ func Moviemobile(c *fiber.Ctx) error {
 		movie_year, _ := jsonparser.GetInt(value, "movie_year")
 		movie_view, _ := jsonparser.GetInt(value, "movie_view")
 		movie_img, _ := jsonparser.GetString(value, "movie_img")
-		movie_genre, _ := jsonparser.GetString(value, "movie_genre")
-		movie_totalsource, _ := jsonparser.GetInt(value, "movie_totalsource")
-		movie_video, _, _, _ := jsonparser.Get(value, "movie_video")
-
-		var objmoviesrc entities.Model_movievideo
-		var arraobjmoviesrc []entities.Model_movievideo
-		jsonparser.ArrayEach(movie_video, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-			movie_src, _ := jsonparser.GetString(value, "movie_src")
-			objmoviesrc.Movie_src = movie_src
-			arraobjmoviesrc = append(arraobjmoviesrc, objmoviesrc)
-		})
 
 		obj.Movie_id = int(movie_id)
 		obj.Movie_type = movie_type
 		obj.Movie_title = movie_title
 		obj.Movie_label = movie_label
 		obj.Movie_descp = movie_descp
-		obj.Movie_genre = movie_genre
 		obj.Movie_year = int(movie_year)
 		obj.Movie_view = int(movie_view)
 		obj.Movie_img = movie_img
-		obj.Movie_totalsource = int(movie_totalsource)
-		obj.Movie_video = arraobjmoviesrc
 		arraobj = append(arraobj, obj)
 	})
 	if !flag {
@@ -377,7 +364,11 @@ func Moviemobile(c *fiber.Ctx) error {
 				"record":  nil,
 			})
 		}
-		helpers.SetRedis(Fieldmovie_mobile_redis+"_"+client.Client_type, result, time.Minute*120)
+		if client.Client_type != "random" {
+			helpers.SetRedis(Fieldmovie_mobile_redis+"_"+client.Client_type, result, time.Minute*120)
+		} else {
+			helpers.SetRedis(Fieldmovie_mobile_redis+"_"+client.Client_type, result, time.Minute*5)
+		}
 		log.Println("MOVIE MOBILE MYSQL")
 		return c.JSON(result)
 	} else {
@@ -386,6 +377,97 @@ func Moviemobile(c *fiber.Ctx) error {
 			"status":  fiber.StatusOK,
 			"message": message_RD,
 			"record":  arraobj,
+			"time":    time.Since(render_page).String(),
+		})
+	}
+}
+func Moviefrontpagemovile(c *fiber.Ctx) error {
+	var obj entities.Model_mobilemoviecategory
+	var arraobj []entities.Model_mobilemoviecategory
+	var objslider entities.Model_movie
+	var arraobjslider []entities.Model_movie
+	render_page := time.Now()
+	resultredis, flag := helpers.GetRedis(Fieldfrontpagemovie_mobile_redis)
+	jsonredis := []byte(resultredis)
+	message_RD, _ := jsonparser.GetString(jsonredis, "message")
+	recordslider_RD, _, _, _ := jsonparser.Get(jsonredis, "slider")
+	record_RD, _, _, _ := jsonparser.Get(jsonredis, "genre")
+	jsonparser.ArrayEach(recordslider_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		movie_id, _ := jsonparser.GetInt(value, "movie_id")
+		movie_type, _ := jsonparser.GetString(value, "movie_type")
+		movie_title, _ := jsonparser.GetString(value, "movie_title")
+		movie_label, _ := jsonparser.GetString(value, "movie_label")
+		movie_thumbnail, _ := jsonparser.GetString(value, "movie_thumbnail")
+		movie_video, _, _, _ := jsonparser.Get(value, "movie_video")
+		var objmoviesrc entities.Model_movievideo
+		var arraobjmoviesrc []entities.Model_movievideo
+		jsonparser.ArrayEach(movie_video, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+			movie_src, _ := jsonparser.GetString(value, "movie_src")
+			objmoviesrc.Movie_src = movie_src
+			arraobjmoviesrc = append(arraobjmoviesrc, objmoviesrc)
+		})
+		objslider.Movie_id = int(movie_id)
+		objslider.Movie_type = movie_type
+		objslider.Movie_title = movie_title
+		objslider.Movie_label = movie_label
+		objslider.Movie_thumbnail = movie_thumbnail
+		objslider.Movie_video = arraobjmoviesrc
+		arraobjslider = append(arraobjslider, objslider)
+	})
+	jsonparser.ArrayEach(record_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		movie_idcategory, _ := jsonparser.GetInt(value, "movie_idcategory")
+		movie_category, _ := jsonparser.GetString(value, "movie_category")
+		movie_list, _, _, _ := jsonparser.Get(value, "movie_list")
+		var objchild entities.Model_movie
+		var arraobjchild []entities.Model_movie
+		jsonparser.ArrayEach(movie_list, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+			movie_id, _ := jsonparser.GetInt(value, "movie_id")
+			movie_type, _ := jsonparser.GetString(value, "movie_type")
+			movie_title, _ := jsonparser.GetString(value, "movie_title")
+			movie_label, _ := jsonparser.GetString(value, "movie_label")
+			movie_thumbnail, _ := jsonparser.GetString(value, "movie_thumbnail")
+			movie_video, _, _, _ := jsonparser.Get(value, "movie_video")
+			var objmoviesrc entities.Model_movievideo
+			var arraobjmoviesrc []entities.Model_movievideo
+			jsonparser.ArrayEach(movie_video, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+				movie_src, _ := jsonparser.GetString(value, "movie_src")
+				objmoviesrc.Movie_src = movie_src
+				arraobjmoviesrc = append(arraobjmoviesrc, objmoviesrc)
+			})
+			objchild.Movie_id = int(movie_id)
+			objchild.Movie_type = movie_type
+			objchild.Movie_title = movie_title
+			objchild.Movie_label = movie_label
+			objchild.Movie_thumbnail = movie_thumbnail
+			objchild.Movie_video = arraobjmoviesrc
+			arraobjchild = append(arraobjchild, objchild)
+		})
+
+		obj.Movie_idcategory = int(movie_idcategory)
+		obj.Movie_category = movie_category
+		obj.Movie_list = arraobjchild
+		arraobj = append(arraobj, obj)
+	})
+	if !flag {
+		result, err := models.Fetch_frontpage()
+		if err != nil {
+			c.Status(fiber.StatusBadRequest)
+			return c.JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": err.Error(),
+				"record":  nil,
+			})
+		}
+		helpers.SetRedis(Fieldfrontpagemovie_mobile_redis, result, time.Minute*120)
+		log.Println("MOVIE FRONTPAGE MYSQL")
+		return c.JSON(result)
+	} else {
+		log.Println("MOVIE FRONTPAGE CACHE")
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusOK,
+			"message": message_RD,
+			"slider":  arraobjslider,
+			"genre":   arraobj,
 			"time":    time.Since(render_page).String(),
 		})
 	}

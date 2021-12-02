@@ -19,6 +19,13 @@ type ResponseKeluaran struct {
 	Paito_sabtu  interface{} `json:"paito_sabtu"`
 	Time         string      `json:"time"`
 }
+type Responsemobilemovie struct {
+	Status  int         `json:"status"`
+	Message string      `json:"message"`
+	Slider  interface{} `json:"slider"`
+	Genre   interface{} `json:"genre"`
+	Time    string      `json:"time"`
+}
 type ResponseAdmin struct {
 	Status   int         `json:"status"`
 	Message  string      `json:"message"`

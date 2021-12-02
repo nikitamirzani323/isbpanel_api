@@ -29,17 +29,19 @@ type Model_movieepisode struct {
 
 //MOBILE
 type Model_movielist struct {
-	Movie_id          int         `json:"movie_id"`
-	Movie_type        string      `json:"movie_type"`
-	Movie_title       string      `json:"movie_title"`
-	Movie_label       string      `json:"movie_label"`
-	Movie_descp       string      `json:"movie_descp"`
-	Movie_year        int         `json:"movie_year"`
-	Movie_view        int         `json:"movie_view"`
-	Movie_img         string      `json:"movie_img"`
-	Movie_genre       string      `json:"movie_genre"`
-	Movie_totalsource int         `json:"movie_totalsource"`
-	Movie_video       interface{} `json:"movie_video"`
+	Movie_id    int    `json:"movie_id"`
+	Movie_type  string `json:"movie_type"`
+	Movie_title string `json:"movie_title"`
+	Movie_label string `json:"movie_label"`
+	Movie_descp string `json:"movie_descp"`
+	Movie_year  int    `json:"movie_year"`
+	Movie_view  int    `json:"movie_view"`
+	Movie_img   string `json:"movie_img"`
+}
+type Model_mobilemoviecategory struct {
+	Movie_idcategory int         `json:"movie_idcategory"`
+	Movie_category   string      `json:"movie_category"`
+	Movie_list       interface{} `json:"movie_list"`
 }
 
 type Controller_clientmovie struct {
