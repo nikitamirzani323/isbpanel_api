@@ -19,6 +19,8 @@ const Fieldseason_home_redis = "LISTSEASON_FRONTEND_ISBPANEL"
 const Fieldepisode_home_redis = "LISTEPISODE_FRONTEND_ISBPANEL"
 
 const Fieldmovie_mobile_redis = "LISTMOVIE-MOBILE"
+const Fieldmoviegenre_mobile_redis = "LISTMOVIEGENRE-MOBILE"
+const Fieldmoviedetail_mobile_redis = "LISTMOVIEDETAIL-MOBILE"
 const Fieldfrontpagemovie_mobile_redis = "LISTFRONTPAGE-MOBILE"
 
 func Moviehome(c *fiber.Ctx) error {
@@ -381,7 +383,184 @@ func Moviemobile(c *fiber.Ctx) error {
 		})
 	}
 }
-func Moviefrontpagemovile(c *fiber.Ctx) error {
+func Moviedetailmobile(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_clientmobiledetailmobile)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+
+	flag_updateview := models.Update_movieview(client.Client_username, client.Client_idmovie)
+	log.Printf("Update View Mobile %d - %s - %t", client.Client_idmovie, client.Client_username, flag_updateview)
+
+	var obj entities.Model_moviedetail
+	var arraobj []entities.Model_moviedetail
+	render_page := time.Now()
+	resultredis, flag := helpers.GetRedis(Fieldmoviedetail_mobile_redis + "_" + strconv.Itoa(client.Client_idmovie))
+	jsonredis := []byte(resultredis)
+	message_RD, _ := jsonparser.GetString(jsonredis, "message")
+	record_RD, _, _, _ := jsonparser.Get(jsonredis, "record")
+	jsonparser.ArrayEach(record_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		movie_id, _ := jsonparser.GetInt(value, "movie_id")
+		movie_type, _ := jsonparser.GetString(value, "movie_type")
+		movie_title, _ := jsonparser.GetString(value, "movie_title")
+		movie_label, _ := jsonparser.GetString(value, "movie_label")
+		movie_descp, _ := jsonparser.GetString(value, "movie_descp")
+		movie_year, _ := jsonparser.GetInt(value, "movie_year")
+		movie_view, _ := jsonparser.GetInt(value, "movie_view")
+		movie_src, _ := jsonparser.GetString(value, "movie_src")
+		movie_img, _ := jsonparser.GetString(value, "movie_img")
+		movie_genre, _ := jsonparser.GetString(value, "movie_genre")
+		movie_totalsource, _ := jsonparser.GetInt(value, "movie_totalsource")
+
+		movie_video, _, _, _ := jsonparser.Get(value, "movie_video")
+		var objmoviesrc entities.Model_movievideo
+		var arraobjmoviesrc []entities.Model_movievideo
+		jsonparser.ArrayEach(movie_video, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+			movie_src, _ := jsonparser.GetString(value, "movie_src")
+			objmoviesrc.Movie_src = movie_src
+			arraobjmoviesrc = append(arraobjmoviesrc, objmoviesrc)
+		})
+
+		obj.Movie_id = int(movie_id)
+		obj.Movie_type = movie_type
+		obj.Movie_title = movie_title
+		obj.Movie_label = movie_label
+		obj.Movie_descp = movie_descp
+		obj.Movie_year = int(movie_year)
+		obj.Movie_view = int(movie_view)
+		obj.Movie_genre = movie_genre
+		obj.Movie_img = movie_img
+		obj.Movie_src = movie_src
+		obj.Movie_video = arraobjmoviesrc
+		obj.Movie_totalsource = int(movie_totalsource)
+		arraobj = append(arraobj, obj)
+	})
+	if !flag {
+		result, err := models.Fetch_moviedetail(client.Client_idmovie)
+		if err != nil {
+			c.Status(fiber.StatusBadRequest)
+			return c.JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": err.Error(),
+				"record":  nil,
+			})
+		}
+		helpers.SetRedis(Fieldmoviedetail_mobile_redis+"_"+strconv.Itoa(client.Client_idmovie), result, time.Minute*120)
+		log.Println("MOVIE MOBILE DETAIL MYSQL")
+		return c.JSON(result)
+	} else {
+		log.Println("MOVIE MOBILE DETAIL CACHE")
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusOK,
+			"message": message_RD,
+			"record":  arraobj,
+			"time":    time.Since(render_page).String(),
+		})
+	}
+}
+func Moviegenremobile(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_clientmobilegenremovie)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+
+	var obj entities.Model_movielist
+	var arraobj []entities.Model_movielist
+	render_page := time.Now()
+	resultredis, flag := helpers.GetRedis(Fieldmoviegenre_mobile_redis + "_" + strconv.Itoa(client.Client_genre))
+	jsonredis := []byte(resultredis)
+	message_RD, _ := jsonparser.GetString(jsonredis, "message")
+	record_RD, _, _, _ := jsonparser.Get(jsonredis, "record")
+	jsonparser.ArrayEach(record_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		movie_id, _ := jsonparser.GetInt(value, "movie_id")
+		movie_type, _ := jsonparser.GetString(value, "movie_type")
+		movie_title, _ := jsonparser.GetString(value, "movie_title")
+		movie_label, _ := jsonparser.GetString(value, "movie_label")
+		movie_descp, _ := jsonparser.GetString(value, "movie_descp")
+		movie_year, _ := jsonparser.GetInt(value, "movie_year")
+		movie_view, _ := jsonparser.GetInt(value, "movie_view")
+		movie_img, _ := jsonparser.GetString(value, "movie_img")
+
+		obj.Movie_id = int(movie_id)
+		obj.Movie_type = movie_type
+		obj.Movie_title = movie_title
+		obj.Movie_label = movie_label
+		obj.Movie_descp = movie_descp
+		obj.Movie_year = int(movie_year)
+		obj.Movie_view = int(movie_view)
+		obj.Movie_img = movie_img
+		arraobj = append(arraobj, obj)
+	})
+	if !flag {
+		result, err := models.Fetch_moviegenre(client.Client_genre)
+		if err != nil {
+			c.Status(fiber.StatusBadRequest)
+			return c.JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": err.Error(),
+				"record":  nil,
+			})
+		}
+		helpers.SetRedis(Fieldmoviegenre_mobile_redis+"_"+strconv.Itoa(client.Client_genre), result, time.Minute*120)
+		log.Println("MOVIE GENRE MOBILE MYSQL")
+		return c.JSON(result)
+	} else {
+		log.Println("MOVIE MOBILE CACHE")
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusOK,
+			"message": message_RD,
+			"record":  arraobj,
+			"time":    time.Since(render_page).String(),
+		})
+	}
+}
+func Moviefrontpagemobile(c *fiber.Ctx) error {
 	var obj entities.Model_mobilemoviecategory
 	var arraobj []entities.Model_mobilemoviecategory
 	var objslider entities.Model_movie

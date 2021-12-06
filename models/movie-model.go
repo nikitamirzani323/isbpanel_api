@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"database/sql"
+	"log"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -50,7 +51,7 @@ func Fetch_movieHome() (helpers.Response, error) {
 			path_image = urlthumbnail_db
 		}
 
-		movie_url, _ := _GetVideo(movieid_db)
+		movie_url, _, _ := _GetVideo(movieid_db, "")
 
 		objtoprated.Movie_id = movieid_db
 		objtoprated.Movie_type = movietype_db
@@ -93,7 +94,7 @@ func Fetch_movieHome() (helpers.Response, error) {
 			path_image = urlthumbnail_db
 		}
 
-		movie_url, _ := _GetVideo(movieid_db)
+		movie_url, _, _ := _GetVideo(movieid_db, "")
 
 		objpopular.Movie_id = movieid_db
 		objpopular.Movie_type = movietype_db
@@ -135,7 +136,7 @@ func Fetch_movieHome() (helpers.Response, error) {
 		} else {
 			path_image = urlthumbnail_db
 		}
-		movie_url, _ := _GetVideo(movieid_db)
+		movie_url, _, _ := _GetVideo(movieid_db, "")
 
 		objchildbaru.Movie_id = movieid_db
 		objchildbaru.Movie_type = movietype_db
@@ -178,7 +179,7 @@ func Fetch_movieHome() (helpers.Response, error) {
 			path_image = urlthumbnail_db
 		}
 
-		movie_url, _ := _GetVideo(movieid_db)
+		movie_url, _, _ := _GetVideo(movieid_db, "")
 
 		objrekomendasi.Movie_id = movieid_db
 		objrekomendasi.Movie_type = movietype_db
@@ -296,17 +297,17 @@ func Fetch_movielist(tipe string) (helpers.Response, error) {
 
 	if tipe == "movie" {
 		sql_select += "SELECT "
-		sql_select += "movieid, posted_id, movietitle, movietype, year, views, urlthumbnail, label, description "
+		sql_select += "movieid, COALESCE(posted_id,0), movietitle, movietype, year, views, urlthumbnail, label, description "
 		sql_select += "FROM " + config.DB_VIEW_MOVIE + " "
 		sql_select += "ORDER BY RAND() DESC LIMIT 300 "
-	} else if tipe == "series" {
+	} else if tipe == "serie" {
 		sql_select += "SELECT "
-		sql_select += "movieid, posted_id, movietitle, movietype, year, views, urlthumbnail, label, description "
+		sql_select += "movieid, COALESCE(posted_id,0), movietitle, movietype, year, views, urlthumbnail, label, description "
 		sql_select += "FROM " + config.DB_VIEW_MOVIESERIES + " "
 		sql_select += "ORDER BY RAND() DESC LIMIT 300 "
 	} else {
 		sql_select += "SELECT "
-		sql_select += "movieid, posted_id, movietitle, movietype, year, views, urlthumbnail, label, description "
+		sql_select += "movieid, COALESCE(posted_id,0), movietitle, movietype, year, views, urlthumbnail, label, description "
 		sql_select += "FROM " + config.DB_tbl_trx_movie + " "
 		sql_select += "WHERE enabled='1' "
 		sql_select += "ORDER BY RAND() DESC LIMIT 30 "
@@ -352,7 +353,228 @@ func Fetch_movielist(tipe string) (helpers.Response, error) {
 
 	return res, nil
 }
+func Fetch_moviegenre(genre int) (helpers.Response, error) {
+	var obj entities.Model_movielist
+	var arraobj []entities.Model_movielist
+	var res helpers.Response
+	msg := "Data Not Found"
+	con := db.CreateCon()
+	ctx := context.Background()
+	start := time.Now()
 
+	sql_select := ""
+	if genre > 0 {
+		sql_select += " "
+		sql_select += "SELECT "
+		sql_select += "A.movieid, COALESCE(A.posted_id,0), A.movietitle, A.movietype, A.year, A.views, A.urlthumbnail, A.label, A.description "
+		sql_select += "FROM " + config.DB_tbl_trx_movie + " as A "
+		sql_select += "JOIN " + config.DB_tbl_trx_moviegenre + " as B on B.movieid = A.movieid  "
+		sql_select += "JOIN " + config.DB_tbl_mst_movie_genre + " as C on C.idgenre = B.idgenre  "
+		sql_select += "WHERE C.idgenre=? "
+		sql_select += "ORDER BY RAND() DESC LIMIT 300 "
+		row, err := con.QueryContext(ctx, sql_select, genre)
+		helpers.ErrorCheck(err)
+
+		for row.Next() {
+			var (
+				movieid_db, posted_id_db, year_db, views_db                            int
+				movietitle_db, movietype_db, label_db, urlthumbnail_db, description_db string
+			)
+
+			err := row.Scan(&movieid_db, &posted_id_db, &movietitle_db, &movietype_db, &year_db, &views_db,
+				&urlthumbnail_db, &label_db, &description_db)
+			helpers.ErrorCheck(err)
+			path_image := ""
+			if urlthumbnail_db == "" {
+				poster_image, poster_extension := _GetMedia(posted_id_db)
+				path_image = "https://duniafilm.b-cdn.net/uploads/cache/poster_thumb/uploads/" + poster_extension + "/" + poster_image
+			} else {
+				path_image = urlthumbnail_db
+			}
+
+			obj.Movie_id = movieid_db
+			obj.Movie_type = movietype_db
+			obj.Movie_title = movietitle_db
+			obj.Movie_label = label_db
+			obj.Movie_descp = description_db
+			obj.Movie_year = year_db
+			obj.Movie_view = views_db
+			obj.Movie_img = path_image
+			arraobj = append(arraobj, obj)
+			msg = "Success"
+		}
+		defer row.Close()
+	}
+	if genre < 0 {
+		sql_select += " "
+		sql_select += "SELECT "
+		sql_select += "SUM(A.ratingposter) as total, "
+		sql_select += "B.movieid, COALESCE(B.posted_id,0), B.movietitle, B.movietype, B.year, B.views, B.urlthumbnail, B.label, B.description "
+		sql_select += "FROM " + config.DB_tbl_trx_rate + " as A "
+		sql_select += "JOIN " + config.DB_tbl_trx_movie + " as B ON B.movieid = A.idposter   "
+		sql_select += "WHERE B.enabled = 1 "
+		sql_select += "GROUP BY A.idposter "
+		sql_select += "ORDER BY total DESC LIMIT 300 "
+		row, err := con.QueryContext(ctx, sql_select)
+		helpers.ErrorCheck(err)
+
+		for row.Next() {
+			var (
+				movieid_db, posted_id_db, year_db, views_db, total_db                  int
+				movietitle_db, movietype_db, label_db, urlthumbnail_db, description_db string
+			)
+
+			err := row.Scan(&total_db, &movieid_db, &posted_id_db, &movietitle_db, &movietype_db, &year_db, &views_db,
+				&urlthumbnail_db, &label_db, &description_db)
+			helpers.ErrorCheck(err)
+			path_image := ""
+			if urlthumbnail_db == "" {
+				poster_image, poster_extension := _GetMedia(posted_id_db)
+				path_image = "https://duniafilm.b-cdn.net/uploads/cache/poster_thumb/uploads/" + poster_extension + "/" + poster_image
+			} else {
+				path_image = urlthumbnail_db
+			}
+
+			obj.Movie_id = movieid_db
+			obj.Movie_type = movietype_db
+			obj.Movie_title = movietitle_db
+			obj.Movie_label = label_db
+			obj.Movie_descp = description_db
+			obj.Movie_year = year_db
+			obj.Movie_view = views_db
+			obj.Movie_img = path_image
+			arraobj = append(arraobj, obj)
+			msg = "Success"
+		}
+		defer row.Close()
+	}
+	if genre == 0 {
+		sql_select += " "
+		sql_select += "SELECT "
+		sql_select += "movieid, COALESCE(posted_id,0), movietitle, movietype, year, views, urlthumbnail, label, description "
+		sql_select += "FROM " + config.DB_tbl_trx_movie + "  "
+		sql_select += "ORDER BY views DESC LIMIT 300 "
+
+		row, err := con.QueryContext(ctx, sql_select)
+		helpers.ErrorCheck(err)
+
+		for row.Next() {
+			var (
+				movieid_db, posted_id_db, year_db, views_db                            int
+				movietitle_db, movietype_db, label_db, urlthumbnail_db, description_db string
+			)
+
+			err := row.Scan(&movieid_db, &posted_id_db, &movietitle_db, &movietype_db, &year_db, &views_db,
+				&urlthumbnail_db, &label_db, &description_db)
+			helpers.ErrorCheck(err)
+			path_image := ""
+			if urlthumbnail_db == "" {
+				poster_image, poster_extension := _GetMedia(posted_id_db)
+				path_image = "https://duniafilm.b-cdn.net/uploads/cache/poster_thumb/uploads/" + poster_extension + "/" + poster_image
+			} else {
+				path_image = urlthumbnail_db
+			}
+
+			obj.Movie_id = movieid_db
+			obj.Movie_type = movietype_db
+			obj.Movie_title = movietitle_db
+			obj.Movie_label = label_db
+			obj.Movie_descp = description_db
+			obj.Movie_year = year_db
+			obj.Movie_view = views_db
+			obj.Movie_img = path_image
+			arraobj = append(arraobj, obj)
+			msg = "Success"
+		}
+		defer row.Close()
+	}
+
+	res.Status = fiber.StatusOK
+	res.Message = msg
+	res.Record = arraobj
+	res.Time = time.Since(start).String()
+
+	return res, nil
+}
+func Fetch_moviedetail(movieid int) (helpers.Response, error) {
+	var obj entities.Model_moviedetail
+	var arraobj []entities.Model_moviedetail
+	var res helpers.Response
+	msg := "Data Not Found"
+	con := db.CreateCon()
+	ctx := context.Background()
+	start := time.Now()
+
+	sql_select := ""
+	sql_select += "SELECT "
+	sql_select += "movieid, COALESCE(posted_id,0), movietitle, movietype, year, views, urlthumbnail, label, description "
+	sql_select += "FROM " + config.DB_tbl_trx_movie + " "
+	sql_select += "WHERE enabled='1' "
+	sql_select += "AND movieid=? "
+
+	row, err := con.QueryContext(ctx, sql_select, movieid)
+	helpers.ErrorCheck(err)
+
+	for row.Next() {
+		var (
+			movieid_db, posted_id_db, year_db, views_db                            int
+			movietitle_db, movietype_db, label_db, urlthumbnail_db, description_db string
+		)
+
+		err := row.Scan(&movieid_db, &posted_id_db, &movietitle_db, &movietype_db, &year_db, &views_db,
+			&urlthumbnail_db, &label_db, &description_db)
+		helpers.ErrorCheck(err)
+		path_image := ""
+		if urlthumbnail_db == "" {
+			poster_image, poster_extension := _GetMedia(posted_id_db)
+			path_image = "https://duniafilm.b-cdn.net/uploads/cache/poster_thumb/uploads/" + poster_extension + "/" + poster_image
+		} else {
+			path_image = urlthumbnail_db
+		}
+		movie_url, totalsource, _ := _GetVideo(movieid_db, "")
+		_, _, movie_src := _GetVideo(movieid_db, "single")
+		genre := ""
+		//GENRE
+		sql_genre := `SELECT 
+			B.nmgenre   
+			FROM ` + config.DB_tbl_trx_moviegenre + ` as A 
+			JOIN ` + config.DB_tbl_mst_movie_genre + ` as B ON B.idgenre = A.idgenre 
+			WHERE A.movieid = ?    
+		`
+		row_genre, err_genre := con.QueryContext(ctx, sql_genre, movieid_db)
+		helpers.ErrorCheck(err_genre)
+		for row_genre.Next() {
+			var nmgenre_db string
+
+			err := row_genre.Scan(&nmgenre_db)
+			helpers.ErrorCheck(err)
+			genre += nmgenre_db + ","
+		}
+
+		obj.Movie_id = movieid_db
+		obj.Movie_type = movietype_db
+		obj.Movie_title = movietitle_db
+		obj.Movie_label = label_db
+		obj.Movie_descp = description_db
+		obj.Movie_year = year_db
+		obj.Movie_view = views_db
+		obj.Movie_img = path_image
+		obj.Movie_genre = genre
+		obj.Movie_src = movie_src
+		obj.Movie_totalsource = totalsource
+		obj.Movie_video = movie_url
+		arraobj = append(arraobj, obj)
+		msg = "Success"
+	}
+	defer row.Close()
+
+	res.Status = fiber.StatusOK
+	res.Message = msg
+	res.Record = arraobj
+	res.Time = time.Since(start).String()
+
+	return res, nil
+}
 func Fetch_frontpage() (helpers.Responsemobilemovie, error) {
 	var obj entities.Model_mobilemoviecategory
 	var arraobj []entities.Model_mobilemoviecategory
@@ -545,6 +767,31 @@ func Fetch_frontpage() (helpers.Responsemobilemovie, error) {
 	return res, nil
 }
 
+func Update_movieview(username string, idmovie int) bool {
+	flag := false
+
+	viewmovielast := _GetMovie(idmovie, "")
+	viewmovienow := viewmovielast + 1
+
+	sql_update := `
+			UPDATE 
+			` + config.DB_tbl_trx_movie + `  
+			SET views =? 
+			WHERE movieid =? 
+		`
+
+	flag_update, msg_update := Exec_SQL(sql_update, config.DB_tbl_trx_movie, "UPDATE", viewmovienow, idmovie)
+
+	if flag_update {
+		flag = true
+		log.Println(msg_update)
+	} else {
+		log.Println(msg_update)
+	}
+
+	return flag
+}
+
 func _GetMedia(idrecord int) (string, string) {
 	con := db.CreateCon()
 	ctx := context.Background()
@@ -565,17 +812,22 @@ func _GetMedia(idrecord int) (string, string) {
 	}
 	return url, extension
 }
-func _GetVideo(idrecord int) (interface{}, int) {
+func _GetVideo(idrecord int, tipe string) (interface{}, int, string) {
 	var obj entities.Model_movievideo
 	var arraobj []entities.Model_movievideo
 	con := db.CreateCon()
 	ctx := context.Background()
 	totalsource := 0
-	sql_select := `SELECT
-		url   
-		FROM ` + config.DB_tbl_mst_movie_source + `  
-		WHERE poster_id = ? 
-	`
+	source := ""
+	sql_select := ""
+	sql_select += "SELECT "
+	sql_select += "url "
+	sql_select += "FROM " + config.DB_tbl_mst_movie_source + " "
+	sql_select += "WHERE poster_id = ? "
+	if tipe == "single" {
+		sql_select += "ORDER BY RAND() DESC LIMIT 1 "
+	}
+
 	row_select, err_select := con.QueryContext(ctx, sql_select, idrecord)
 	helpers.ErrorCheck(err_select)
 	for row_select.Next() {
@@ -584,11 +836,11 @@ func _GetVideo(idrecord int) (interface{}, int) {
 
 		err_select = row_select.Scan(&url_db)
 		helpers.ErrorCheck(err_select)
-
+		source = url_db
 		obj.Movie_src = url_db
 		arraobj = append(arraobj, obj)
 	}
-	return arraobj, totalsource
+	return arraobj, totalsource, source
 }
 func _GetVideoEpisode(idrecord int) string {
 	con := db.CreateCon()
@@ -608,4 +860,23 @@ func _GetVideoEpisode(idrecord int) string {
 		helpers.ErrorCheck(e)
 	}
 	return url
+}
+func _GetMovie(idrecord int, tipe string) int {
+	con := db.CreateCon()
+	ctx := context.Background()
+	views := 0
+
+	sql_select := `SELECT
+		views    
+		FROM ` + config.DB_tbl_trx_movie + `  
+		WHERE movieid = ? 
+	`
+	row := con.QueryRowContext(ctx, sql_select, idrecord)
+	switch e := row.Scan(&views); e {
+	case sql.ErrNoRows:
+	case nil:
+	default:
+		helpers.ErrorCheck(e)
+	}
+	return views
 }

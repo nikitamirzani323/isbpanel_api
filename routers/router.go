@@ -29,7 +29,9 @@ func Init() *fiber.App {
 
 	//MOBILE
 	app.Post("/api/mobile/login", controllers.CheckLoginmobile)
-	app.Post("/api/mobile/frontpagemovie", controllers.Moviefrontpagemovile)
+	app.Post("/api/mobile/frontpagemovie", controllers.Moviefrontpagemobile)
 	app.Post("/api/mobile/listmovie", controllers.Moviemobile)
+	app.Post("/api/mobile/listgenremovie", controllers.Moviegenremobile)
+	app.Post("/api/mobile/moviedetail", controllers.Moviedetailmobile)
 	return app
 }
