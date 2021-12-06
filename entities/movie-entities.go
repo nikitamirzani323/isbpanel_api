@@ -80,3 +80,9 @@ type Controller_clientmobiledetailmobile struct {
 	Client_idmovie  int    `form:"idmovie" validate:"required"`
 	Client_username string `form:"username" validate:"required"`
 }
+type Controller_mobileseason struct {
+	Movie_id int `json:"movie_id" validate:"required"`
+}
+type Controller_mobileepisode struct {
+	Season_id int `json:"season_id" validate:"required"`
+}

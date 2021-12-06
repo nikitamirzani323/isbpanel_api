@@ -22,6 +22,8 @@ const Fieldmovie_mobile_redis = "LISTMOVIE-MOBILE"
 const Fieldmoviegenre_mobile_redis = "LISTMOVIEGENRE-MOBILE"
 const Fieldmoviedetail_mobile_redis = "LISTMOVIEDETAIL-MOBILE"
 const Fieldfrontpagemovie_mobile_redis = "LISTFRONTPAGE-MOBILE"
+const Fieldseason_mobile_redis = "LISTSEASON_MOBILE"
+const Fieldepisode_mobile_redis = "LISTSEASONEPISODE_MOBILE"
 
 func Moviehome(c *fiber.Ctx) error {
 	var errors []*helpers.ErrorResponse
@@ -647,6 +649,142 @@ func Moviefrontpagemobile(c *fiber.Ctx) error {
 			"message": message_RD,
 			"slider":  arraobjslider,
 			"genre":   arraobj,
+			"time":    time.Since(render_page).String(),
+		})
+	}
+}
+func Moviemobileseason(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_mobileseason)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+
+	var obj entities.Model_movieseason
+	var arraobj []entities.Model_movieseason
+	render_page := time.Now()
+	resultredis, flag := helpers.GetRedis(Fieldseason_mobile_redis + "_" + strconv.Itoa(client.Movie_id))
+	jsonredis := []byte(resultredis)
+	message_RD, _ := jsonparser.GetString(jsonredis, "message")
+	record_RD, _, _, _ := jsonparser.Get(jsonredis, "record")
+	jsonparser.ArrayEach(record_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		season_id, _ := jsonparser.GetInt(value, "season_id")
+		season_title, _ := jsonparser.GetString(value, "season_title")
+
+		obj.Season_id = int(season_id)
+		obj.Season_title = season_title
+		arraobj = append(arraobj, obj)
+	})
+	if !flag {
+		result, err := models.SeasonMovie(client.Movie_id)
+		if err != nil {
+			c.Status(fiber.StatusBadRequest)
+			return c.JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": err.Error(),
+				"record":  nil,
+			})
+		}
+		helpers.SetRedis(Fieldseason_mobile_redis+"_"+strconv.Itoa(client.Movie_id), result, time.Minute*30)
+		log.Println("MOVIE SEASON MYSQL")
+		return c.JSON(result)
+	} else {
+		log.Println("MOVIE SEASON CACHE")
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusOK,
+			"message": message_RD,
+			"record":  arraobj,
+			"time":    time.Since(render_page).String(),
+		})
+	}
+}
+func Moviemobileepisode(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_mobileepisode)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+
+	var obj entities.Model_movieepisode
+	var arraobj []entities.Model_movieepisode
+	render_page := time.Now()
+	resultredis, flag := helpers.GetRedis(Fieldepisode_mobile_redis + "_" + strconv.Itoa(client.Season_id))
+	jsonredis := []byte(resultredis)
+	message_RD, _ := jsonparser.GetString(jsonredis, "message")
+	record_RD, _, _, _ := jsonparser.Get(jsonredis, "record")
+	jsonparser.ArrayEach(record_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		episode_id, _ := jsonparser.GetInt(value, "episode_id")
+		episode_title, _ := jsonparser.GetString(value, "episode_title")
+		episode_src, _ := jsonparser.GetString(value, "episode_src")
+
+		obj.Episode_id = int(episode_id)
+		obj.Episode_title = episode_title
+		obj.Episode_src = episode_src
+		arraobj = append(arraobj, obj)
+	})
+	if !flag {
+		result, err := models.EpisodeMovie(client.Season_id)
+		if err != nil {
+			c.Status(fiber.StatusBadRequest)
+			return c.JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": err.Error(),
+				"record":  nil,
+			})
+		}
+		helpers.SetRedis(Fieldepisode_mobile_redis+"_"+strconv.Itoa(client.Season_id), result, time.Minute*30)
+		log.Println("MOVIE SEASON MYSQL")
+		return c.JSON(result)
+	} else {
+		log.Println("MOVIE SEASON CACHE")
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusOK,
+			"message": message_RD,
+			"record":  arraobj,
 			"time":    time.Since(render_page).String(),
 		})
 	}
