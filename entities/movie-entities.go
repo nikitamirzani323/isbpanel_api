@@ -48,6 +48,7 @@ type Model_moviedetail struct {
 	Movie_img         string      `json:"movie_img"`
 	Movie_genre       string      `json:"movie_genre"`
 	Movie_src         string      `json:"movie_src"`
+	Movie_favorite    string      `json:"movie_favorite"`
 	Movie_totalsource int         `json:"movie_totalsource"`
 	Movie_video       interface{} `json:"movie_video"`
 }
@@ -103,4 +104,8 @@ type Controller_clientmobilesaverate struct {
 	Movierate_movieid  int    `form:"movierate_movieid" validate:"required"`
 	Movierate_rating   string `form:"movierate_rating" validate:"required"`
 	Movierate_username string `form:"movierate_username" validate:"required"`
+}
+type Controller_clientmobilesavefavorite struct {
+	Moviefavorite_movieid  int    `form:"moviefavorite_movieid" validate:"required"`
+	Moviefavorite_username string `form:"moviefavorite_username" validate:"required"`
 }

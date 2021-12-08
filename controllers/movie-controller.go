@@ -422,7 +422,7 @@ func Moviedetailmobile(c *fiber.Ctx) error {
 	var obj entities.Model_moviedetail
 	var arraobj []entities.Model_moviedetail
 	render_page := time.Now()
-	resultredis, flag := helpers.GetRedis(Fieldmoviedetail_mobile_redis + "_" + strconv.Itoa(client.Client_idmovie))
+	resultredis, flag := helpers.GetRedis(Fieldmoviedetail_mobile_redis + "_" + strconv.Itoa(client.Client_idmovie) + "_" + client.Client_username)
 	jsonredis := []byte(resultredis)
 	message_RD, _ := jsonparser.GetString(jsonredis, "message")
 	record_RD, _, _, _ := jsonparser.Get(jsonredis, "record")
@@ -435,6 +435,7 @@ func Moviedetailmobile(c *fiber.Ctx) error {
 		movie_year, _ := jsonparser.GetInt(value, "movie_year")
 		movie_view, _ := jsonparser.GetInt(value, "movie_view")
 		movie_src, _ := jsonparser.GetString(value, "movie_src")
+		movie_favorite, _ := jsonparser.GetString(value, "movie_favorite")
 		movie_img, _ := jsonparser.GetString(value, "movie_img")
 		movie_genre, _ := jsonparser.GetString(value, "movie_genre")
 		movie_totalsource, _ := jsonparser.GetInt(value, "movie_totalsource")
@@ -458,12 +459,13 @@ func Moviedetailmobile(c *fiber.Ctx) error {
 		obj.Movie_genre = movie_genre
 		obj.Movie_img = movie_img
 		obj.Movie_src = movie_src
+		obj.Movie_favorite = movie_favorite
 		obj.Movie_video = arraobjmoviesrc
 		obj.Movie_totalsource = int(movie_totalsource)
 		arraobj = append(arraobj, obj)
 	})
 	if !flag {
-		result, err := models.Fetch_moviedetail(client.Client_idmovie)
+		result, err := models.Fetch_moviedetail(client.Client_idmovie, client.Client_username)
 		if err != nil {
 			c.Status(fiber.StatusBadRequest)
 			return c.JSON(fiber.Map{
@@ -472,7 +474,7 @@ func Moviedetailmobile(c *fiber.Ctx) error {
 				"record":  nil,
 			})
 		}
-		helpers.SetRedis(Fieldmoviedetail_mobile_redis+"_"+strconv.Itoa(client.Client_idmovie), result, time.Minute*120)
+		helpers.SetRedis(Fieldmoviedetail_mobile_redis+"_"+strconv.Itoa(client.Client_idmovie)+"_"+client.Client_username, result, time.Minute*120)
 		log.Println("MOVIE MOBILE DETAIL MYSQL")
 		return c.JSON(result)
 	} else {
@@ -957,6 +959,56 @@ func Movieratesave(c *fiber.Ctx) error {
 		flag_memberpoint := models.Update_pointmember(client.Movierate_username)
 		log.Printf("POINT MEMBER STATUS : %t", flag_memberpoint)
 
+		c.Status(fiber.StatusOK)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusOK,
+			"message": "Berhasil",
+			"record":  nil,
+		})
+	} else {
+		c.Status(fiber.StatusOK)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "Failed",
+			"record":  nil,
+		})
+	}
+}
+func Moviefavoritesave(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_clientmobilesavefavorite)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		log.Println(err.Error())
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		log.Println(errors)
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+	log.Printf("%s - %d", client.Moviefavorite_username, client.Moviefavorite_movieid)
+	flag := models.Save_moviefavorite(client.Moviefavorite_username, client.Moviefavorite_movieid)
+	if flag {
+		val_comment := helpers.DeleteRedis(Fieldmoviedetail_mobile_redis + "_" + strconv.Itoa(client.Moviefavorite_movieid) + "_" + client.Moviefavorite_username)
+		log.Printf("Redis Delete MOVIE DETAIL : %d", val_comment)
 		c.Status(fiber.StatusOK)
 		return c.JSON(fiber.Map{
 			"status":  fiber.StatusOK,

@@ -498,7 +498,7 @@ func Fetch_moviegenre(genre int) (helpers.Response, error) {
 
 	return res, nil
 }
-func Fetch_moviedetail(movieid int) (helpers.Response, error) {
+func Fetch_moviedetail(movieid int, username string) (helpers.Response, error) {
 	var obj entities.Model_moviedetail
 	var arraobj []entities.Model_moviedetail
 	var res helpers.Response
@@ -563,6 +563,7 @@ func Fetch_moviedetail(movieid int) (helpers.Response, error) {
 		obj.Movie_img = path_image
 		obj.Movie_genre = genre
 		obj.Movie_src = movie_src
+		obj.Movie_favorite = _GetFavorite(movieid_db, username)
 		obj.Movie_totalsource = totalsource
 		obj.Movie_video = movie_url
 		arraobj = append(arraobj, obj)
@@ -894,6 +895,36 @@ func Save_movierate(username, rating string, idmovie int) bool {
 
 	return flag
 }
+func Save_moviefavorite(username string, idmovie int) bool {
+	tglnow, _ := goment.New()
+	flag := false
+
+	flag_check := CheckDBTwoField(config.DB_tbl_trx_favorite, "username", username, "idposter", strconv.Itoa(idmovie))
+	if !flag_check {
+		field_column := config.DB_tbl_trx_favorite + tglnow.Format("YYYY")
+		idrecord_counter := Get_counter(field_column)
+		sql_insert := `
+			insert into
+			` + config.DB_tbl_trx_favorite + ` (
+				idfavorite , idposter, username, createfavorite
+			) values (
+				?,?,?,?
+			)
+		`
+		flag_insert, msg_insert := Exec_SQL(sql_insert, config.DB_tbl_trx_favorite, "INSERT",
+			tglnow.Format("YY")+tglnow.Format("MM")+strconv.Itoa(idrecord_counter),
+			idmovie, username, tglnow.Format("YYYY-MM-DD HH:mm:ss"))
+
+		if flag_insert {
+			flag = true
+			log.Println(msg_insert)
+		} else {
+			log.Println(msg_insert)
+		}
+	}
+
+	return flag
+}
 func Save_moviepoint(username, nmpoint string, idmovie, point int) bool {
 	tglnow, _ := goment.New()
 	flag := false
@@ -1055,4 +1086,25 @@ func _GetPoint_In(username string) int {
 		helpers.ErrorCheck(e)
 	}
 	return totalpoint
+}
+func _GetFavorite(idrecord int, username string) string {
+	con := db.CreateCon()
+	ctx := context.Background()
+	idfavorite := 0
+	favorite := "N"
+
+	sql_select := `SELECT
+		idfavorite   
+		FROM ` + config.DB_tbl_trx_favorite + `  
+		WHERE idposter = ? AND username=? 
+	`
+	row := con.QueryRowContext(ctx, sql_select, idrecord, username)
+	switch e := row.Scan(&idfavorite); e {
+	case sql.ErrNoRows:
+	case nil:
+		favorite = "Y"
+	default:
+		helpers.ErrorCheck(e)
+	}
+	return favorite
 }
