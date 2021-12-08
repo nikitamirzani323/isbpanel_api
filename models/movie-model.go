@@ -766,6 +766,52 @@ func Fetch_frontpage() (helpers.Responsemobilemovie, error) {
 
 	return res, nil
 }
+func Fetch_moviecomment(movieid int) (helpers.Response, error) {
+	var obj entities.Model_mobilemoviecomment
+	var arraobj []entities.Model_mobilemoviecomment
+	var res helpers.Response
+	msg := "Data Not Found"
+	con := db.CreateCon()
+	ctx := context.Background()
+	start := time.Now()
+
+	sql_select := `SELECT 
+		A.idcomment, B.nmuser , A.comment, A.createcomment 
+		FROM ` + config.DB_tbl_trx_comment + ` as A 
+		JOIN ` + config.DB_tbl_trx_user + ` as B ON B.username = A.username  
+		WHERE A.idposter=?  
+		AND B.statususer='Y' 
+		ORDER BY A.createcomment DESC LIMIT 100   
+	`
+
+	row, err := con.QueryContext(ctx, sql_select, movieid)
+	helpers.ErrorCheck(err)
+	for row.Next() {
+		var (
+			idcomment_db                            int
+			nmuser_db, comment_db, createcomment_db string
+		)
+
+		err = row.Scan(&idcomment_db, &nmuser_db, &comment_db, &createcomment_db)
+
+		helpers.ErrorCheck(err)
+
+		obj.Movie_idcomment = idcomment_db
+		obj.Movie_name = nmuser_db
+		obj.Movie_comment = comment_db
+		obj.Movie_create = createcomment_db
+		arraobj = append(arraobj, obj)
+		msg = "Success"
+	}
+	defer row.Close()
+
+	res.Status = fiber.StatusOK
+	res.Message = msg
+	res.Record = arraobj
+	res.Time = time.Since(start).String()
+
+	return res, nil
+}
 
 func Update_movieview(username string, idmovie int) bool {
 	flag := false
