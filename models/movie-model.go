@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -11,6 +12,7 @@ import (
 	"github.com/nikitamirzani323/isbpanel_api/db"
 	"github.com/nikitamirzani323/isbpanel_api/entities"
 	"github.com/nikitamirzani323/isbpanel_api/helpers"
+	"github.com/nleeper/goment"
 )
 
 func Fetch_movieHome() (helpers.Response, error) {
@@ -837,7 +839,116 @@ func Update_movieview(username string, idmovie int) bool {
 
 	return flag
 }
+func Save_moviecomment(username, comment string, idmovie int) bool {
+	tglnow, _ := goment.New()
+	flag := false
 
+	field_column := config.DB_tbl_trx_comment + tglnow.Format("YYYY")
+	idrecord_counter := Get_counter(field_column)
+	sql_insert := `
+			insert into
+			` + config.DB_tbl_trx_comment + ` (
+				idcomment , idposter, username, comment, statusread, createcomment
+			) values (
+				?,?,?,?,?,?
+			)
+		`
+	flag_insert, msg_insert := Exec_SQL(sql_insert, config.DB_tbl_trx_comment, "INSERT", tglnow.Format("YY")+strconv.Itoa(idrecord_counter), idmovie, username, comment, "Y", tglnow.Format("YYYY-MM-DD HH:mm:ss"))
+
+	if flag_insert {
+		flag = true
+		log.Println(msg_insert)
+	} else {
+		log.Println(msg_insert)
+	}
+
+	return flag
+}
+func Save_movierate(username, rating string, idmovie int) bool {
+	tglnow, _ := goment.New()
+	flag := false
+
+	flag_check := CheckDBTwoField(config.DB_tbl_trx_rate, "username", username, "idposter", strconv.Itoa(idmovie))
+	if !flag_check {
+		field_column := config.DB_tbl_trx_rate + tglnow.Format("YYYY")
+		idrecord_counter := Get_counter(field_column)
+		sql_insert := `
+			insert into
+			` + config.DB_tbl_trx_rate + ` (
+				idrate , username, idposter, ratingposter, createrate
+			) values (
+				?,?,?,?,?
+			)
+		`
+		flag_insert, msg_insert := Exec_SQL(sql_insert, config.DB_tbl_trx_rate, "INSERT",
+			tglnow.Format("YY")+strconv.Itoa(idrecord_counter),
+			username, idmovie, rating, tglnow.Format("YYYY-MM-DD HH:mm:ss"))
+
+		if flag_insert {
+			flag = true
+			log.Println(msg_insert)
+		} else {
+			log.Println(msg_insert)
+		}
+	}
+
+	return flag
+}
+func Save_moviepoint(username, nmpoint string, idmovie, point int) bool {
+	tglnow, _ := goment.New()
+	flag := false
+
+	field_column := config.DB_tbl_mst_point + tglnow.Format("YYYY")
+	idrecord_counter := Get_counter(field_column)
+	sql_insert := `
+			insert into
+			` + config.DB_tbl_mst_point + ` (
+				idpoint , username, nmpoint, posted_id, point, createdatepoint
+			) values (
+				?,?,?,?,?,?
+			)
+		`
+	flag_insert, msg_insert := Exec_SQL(sql_insert, config.DB_tbl_mst_point, "INSERT",
+		tglnow.Format("YY")+tglnow.Format("MM")+strconv.Itoa(idrecord_counter),
+		username, nmpoint, idmovie, point, tglnow.Format("YYYY-MM-DD HH:mm:ss"))
+
+	if flag_insert {
+		flag = true
+		log.Println(msg_insert)
+
+	} else {
+		log.Println(msg_insert)
+	}
+
+	return flag
+}
+func Update_pointmember(username string) bool {
+	tglnow, _ := goment.New()
+	flag := false
+
+	point_total := _GetPoint_In(username)
+
+	sql_update := `
+		UPDATE 
+		` + config.DB_tbl_trx_user + ` 
+		SET point_in=?, updatedateuser=? 
+		WHERE username=? 
+	`
+	log.Println(username)
+	log.Println(point_total)
+	flag_update, msg_update := Exec_SQL(sql_update, config.DB_tbl_trx_user, "UPDATE",
+		point_total, tglnow.Format("YYYY-MM-DD HH:mm:ss"), username)
+
+	if flag_update {
+		flag = true
+		log.Println(msg_update)
+
+	} else {
+		log.Println(msg_update)
+	}
+
+	return flag
+}
 func _GetMedia(idrecord int) (string, string) {
 	con := db.CreateCon()
 	ctx := context.Background()
@@ -925,4 +1036,23 @@ func _GetMovie(idrecord int, tipe string) int {
 		helpers.ErrorCheck(e)
 	}
 	return views
+}
+func _GetPoint_In(username string) int {
+	con := db.CreateCon()
+	ctx := context.Background()
+	totalpoint := 0
+
+	sql_select := `SELECT
+		SUM(point) as totalpoint     
+		FROM ` + config.DB_tbl_mst_point + `  
+		WHERE username = ? 
+	`
+	row := con.QueryRowContext(ctx, sql_select, username)
+	switch e := row.Scan(&totalpoint); e {
+	case sql.ErrNoRows:
+	case nil:
+	default:
+		helpers.ErrorCheck(e)
+	}
+	return totalpoint
 }

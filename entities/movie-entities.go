@@ -94,3 +94,13 @@ type Controller_mobileepisode struct {
 type Controller_clientmobilecomment struct {
 	Movie_id int `json:"movie_id" form:"movie_id" validate:"required"`
 }
+type Controller_clientmobilesavecomment struct {
+	Moviecomment_movieid  int    `json:"moviecomment_movieid" form:"moviecomment_movieid" validate:"required"`
+	Moviecomment_username string `json:"moviecomment_username" form:"moviecomment_username" validate:"required"`
+	Moviecomment_comment  string `json:"moviecomment_comment" form:"moviecomment_comment" validate:"required"`
+}
+type Controller_clientmobilesaverate struct {
+	Movierate_movieid  int    `form:"movierate_movieid" validate:"required"`
+	Movierate_rating   string `form:"movierate_rating" validate:"required"`
+	Movierate_username string `form:"movierate_username" validate:"required"`
+}

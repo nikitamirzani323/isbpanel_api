@@ -36,5 +36,7 @@ func Init() *fiber.App {
 	app.Post("/api/mobile/season", controllers.Moviemobileseason)
 	app.Post("/api/mobile/episode", controllers.Moviemobileepisode)
 	app.Post("/api/mobile/comment", controllers.Moviecommentmobile)
+	app.Post("/api/mobile/savecomment", controllers.Moviecommentsave)
+	app.Post("/api/mobile/saverate", controllers.Movieratesave)
 	return app
 }

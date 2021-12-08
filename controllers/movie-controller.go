@@ -9,6 +9,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/nikitamirzani323/isbpanel_api/config"
 	"github.com/nikitamirzani323/isbpanel_api/entities"
 	"github.com/nikitamirzani323/isbpanel_api/helpers"
 	"github.com/nikitamirzani323/isbpanel_api/models"
@@ -858,6 +859,116 @@ func Moviemobileepisode(c *fiber.Ctx) error {
 			"message": message_RD,
 			"record":  arraobj,
 			"time":    time.Since(render_page).String(),
+		})
+	}
+}
+func Moviecommentsave(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_clientmobilesavecomment)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+
+	flag := models.Save_moviecomment(client.Moviecomment_username, client.Moviecomment_comment, client.Moviecomment_movieid)
+	if flag {
+		val_comment := helpers.DeleteRedis(Fieldmoviecomment_mobile_redis + "_" + strconv.Itoa(client.Moviecomment_movieid))
+		log.Printf("Redis Delete MOVIE COMMENT : %d", val_comment)
+
+		flag_point := models.Save_moviepoint(client.Moviecomment_username, "POINT_COMMENT", client.Moviecomment_movieid, config.POINT_COMMENT)
+		log.Printf("POINT_COMMENT STATUS : %t", flag_point)
+
+		flag_memberpoint := models.Update_pointmember(client.Moviecomment_username)
+		log.Printf("POINT MEMBER STATUS : %t", flag_memberpoint)
+
+		c.Status(fiber.StatusOK)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusOK,
+			"message": "Berhasil",
+			"record":  nil,
+		})
+	} else {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "Failed",
+			"record":  nil,
+		})
+	}
+}
+func Movieratesave(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_clientmobilesaverate)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		log.Println(err.Error())
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		log.Println(errors)
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+	log.Printf("%s - %d - %d", client.Movierate_username, client.Movierate_movieid, client.Movierate_rating)
+	flag := models.Save_movierate(client.Movierate_username, client.Movierate_rating, client.Movierate_movieid)
+	if flag {
+
+		flag_point := models.Save_moviepoint(client.Movierate_username, "POINT_RATE", client.Movierate_movieid, config.POINT_RATE)
+		log.Printf("POINT_RATE STATUS : %t", flag_point)
+
+		flag_memberpoint := models.Update_pointmember(client.Movierate_username)
+		log.Printf("POINT MEMBER STATUS : %t", flag_memberpoint)
+
+		c.Status(fiber.StatusOK)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusOK,
+			"message": "Berhasil",
+			"record":  nil,
+		})
+	} else {
+		c.Status(fiber.StatusOK)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "Failed",
+			"record":  nil,
 		})
 	}
 }

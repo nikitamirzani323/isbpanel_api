@@ -13,6 +13,7 @@ const (
 	DB_tbl_mst_series_episode string = "tbl_mst_series_episode"
 	DB_tbl_mst_pasaran        string = "tbl_mst_pasaran_togel"
 	DB_tbl_mst_tafsirmimpi    string = "tbl_mst_togel_tafsir_mimpi"
+	DB_tbl_mst_point          string = "tbl_mst_point"
 	DB_tbl_trx_keluaran       string = "tbl_trx_keluaran"
 	DB_tbl_trx_prediksi       string = "tbl_trx_prediksi"
 	DB_tbl_trx_news           string = "tbl_trx_news"
@@ -29,6 +30,9 @@ const (
 	STATUS_RUNNING            string = "background:#FFEB3B;font-weight:bold;color:black;"
 	STATUS_COMPLETE           string = "background:#8BC34A;font-weight:bold;color:black;"
 	STATUS_CANCEL             string = "background:#E91E63;font-weight:bold;color:white;"
+	POINT_LOGIN               int    = 5
+	POINT_RATE                int    = 5
+	POINT_COMMENT             int    = 2
 )
 
 const Sourcechar string = `ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 !@#$%^&*()-_=+[]{};:,.<>?/`
