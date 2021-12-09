@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -286,7 +287,7 @@ func EpisodeMovie(idseason int) (helpers.Response, error) {
 }
 
 //MOBILE
-func Fetch_movielist(tipe string) (helpers.Response, error) {
+func Fetch_movielist(tipe, username string) (helpers.Response, error) {
 	var obj entities.Model_movielist
 	var arraobj []entities.Model_movielist
 	var res helpers.Response
@@ -301,18 +302,25 @@ func Fetch_movielist(tipe string) (helpers.Response, error) {
 		sql_select += "SELECT "
 		sql_select += "movieid, COALESCE(posted_id,0), movietitle, movietype, year, views, urlthumbnail, label, description "
 		sql_select += "FROM " + config.DB_VIEW_MOVIE + " "
-		sql_select += "ORDER BY RAND() DESC LIMIT 300 "
+		sql_select += "ORDER BY RAND()  LIMIT 300 "
 	} else if tipe == "serie" {
 		sql_select += "SELECT "
 		sql_select += "movieid, COALESCE(posted_id,0), movietitle, movietype, year, views, urlthumbnail, label, description "
 		sql_select += "FROM " + config.DB_VIEW_MOVIESERIES + " "
-		sql_select += "ORDER BY RAND() DESC LIMIT 300 "
+		sql_select += "ORDER BY RAND()  LIMIT 300 "
+	} else if tipe == "favorite" {
+		sql_select += "SELECT "
+		sql_select += "idposter as movieid, COALESCE(posted_id,0), movietitle, movietype, year, views, urlthumbnail, label, description "
+		sql_select += "FROM " + config.DB_VIEW_MOVIEFAVORITE + " "
+		sql_select += "WHERE username='" + username + "' "
+		sql_select += "ORDER BY createfavorite DESC LIMIT 300 "
+		log.Println(sql_select)
 	} else {
 		sql_select += "SELECT "
 		sql_select += "movieid, COALESCE(posted_id,0), movietitle, movietype, year, views, urlthumbnail, label, description "
 		sql_select += "FROM " + config.DB_tbl_trx_movie + " "
 		sql_select += "WHERE enabled='1' "
-		sql_select += "ORDER BY RAND() DESC LIMIT 30 "
+		sql_select += "ORDER BY RAND()  LIMIT 30 "
 	}
 
 	row, err := con.QueryContext(ctx, sql_select)
@@ -921,6 +929,58 @@ func Save_moviefavorite(username string, idmovie int) bool {
 		} else {
 			log.Println(msg_insert)
 		}
+	}
+
+	return flag
+}
+func Delete_moviefavorite(username string, idmovie int) bool {
+	flag := false
+
+	flag_check := CheckDBTwoField(config.DB_tbl_trx_favorite, "username", username, "idposter", strconv.Itoa(idmovie))
+	if flag_check {
+		sql_delete := `
+			DELETE FROM 
+			` + config.DB_tbl_trx_favorite + ` 
+			WHERE idposter=? AND username=?
+		`
+		flag_delete, msg_delete := Exec_SQL(sql_delete, config.DB_tbl_trx_favorite, "DELETE", idmovie, username)
+
+		if flag_delete {
+			flag = true
+			log.Println(msg_delete)
+		} else {
+			log.Println(msg_delete)
+		}
+	}
+
+	return flag
+}
+func Save_moviereport(username, info string, idmovie int) bool {
+	tglnow, _ := goment.New()
+	flag := false
+
+	info_1 := strings.ToUpper(info)
+	info_final := strings.Replace(info_1, " ", "_", -1)
+
+	field_column := config.DB_tbl_mst_report + tglnow.Format("YYYY")
+	idrecord_counter := Get_counter(field_column)
+	sql_insert := `
+			insert into
+			` + config.DB_tbl_mst_report + ` (
+				idreport , idmovie, username, inforeport, poinreport, statusreport, createdatereport 
+			) values (
+				?,?,?,?,?,?,?
+			)
+		`
+	flag_insert, msg_insert := Exec_SQL(sql_insert, config.DB_tbl_trx_favorite, "INSERT",
+		tglnow.Format("YY")+tglnow.Format("MM")+strconv.Itoa(idrecord_counter),
+		idmovie, username, info_final, 0, "PROCESS", tglnow.Format("YYYY-MM-DD HH:mm:ss"))
+
+	if flag_insert {
+		flag = true
+		log.Println(msg_insert)
+	} else {
+		log.Println(msg_insert)
 	}
 
 	return flag

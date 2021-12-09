@@ -77,7 +77,8 @@ type Controller_episode struct {
 }
 
 type Controller_clientmobilemovie struct {
-	Client_type string `json:"type" form:"type" validate:"required"`
+	Client_type     string `form:"type" validate:"required"`
+	Client_username string `form:"username" `
 }
 type Controller_clientmobilegenremovie struct {
 	Client_genre int `form:"genre" `
@@ -108,4 +109,9 @@ type Controller_clientmobilesaverate struct {
 type Controller_clientmobilesavefavorite struct {
 	Moviefavorite_movieid  int    `form:"moviefavorite_movieid" validate:"required"`
 	Moviefavorite_username string `form:"moviefavorite_username" validate:"required"`
+}
+type Controller_clientmobilesavereport struct {
+	Moviereport_movieid  int    `form:"moviereport_movieid" validate:"required"`
+	Moviereport_username string `form:"moviereport_username" validate:"required"`
+	Moviereport_info     string `form:"moviereport_info" validate:"required"`
 }

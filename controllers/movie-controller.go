@@ -332,11 +332,17 @@ func Moviemobile(c *fiber.Ctx) error {
 			"record":  errors,
 		})
 	}
+	pathredis := ""
+	if client.Client_username == "" {
+		pathredis = Fieldmovie_mobile_redis + "_" + client.Client_type
+	} else {
+		pathredis = Fieldmovie_mobile_redis + "_" + client.Client_type + "_" + client.Client_username
+	}
 
 	var obj entities.Model_movielist
 	var arraobj []entities.Model_movielist
 	render_page := time.Now()
-	resultredis, flag := helpers.GetRedis(Fieldmovie_mobile_redis + "_" + client.Client_type)
+	resultredis, flag := helpers.GetRedis(pathredis)
 	jsonredis := []byte(resultredis)
 	message_RD, _ := jsonparser.GetString(jsonredis, "message")
 	record_RD, _, _, _ := jsonparser.Get(jsonredis, "record")
@@ -361,7 +367,7 @@ func Moviemobile(c *fiber.Ctx) error {
 		arraobj = append(arraobj, obj)
 	})
 	if !flag {
-		result, err := models.Fetch_movielist(client.Client_type)
+		result, err := models.Fetch_movielist(client.Client_type, client.Client_username)
 		if err != nil {
 			c.Status(fiber.StatusBadRequest)
 			return c.JSON(fiber.Map{
@@ -371,9 +377,9 @@ func Moviemobile(c *fiber.Ctx) error {
 			})
 		}
 		if client.Client_type != "random" {
-			helpers.SetRedis(Fieldmovie_mobile_redis+"_"+client.Client_type, result, time.Minute*120)
+			helpers.SetRedis(pathredis, result, time.Minute*120)
 		} else {
-			helpers.SetRedis(Fieldmovie_mobile_redis+"_"+client.Client_type, result, time.Minute*5)
+			helpers.SetRedis(pathredis, result, time.Minute*10)
 		}
 		log.Println("MOVIE MOBILE MYSQL")
 		return c.JSON(result)
@@ -1009,6 +1015,104 @@ func Moviefavoritesave(c *fiber.Ctx) error {
 	if flag {
 		val_comment := helpers.DeleteRedis(Fieldmoviedetail_mobile_redis + "_" + strconv.Itoa(client.Moviefavorite_movieid) + "_" + client.Moviefavorite_username)
 		log.Printf("Redis Delete MOVIE DETAIL : %d", val_comment)
+		c.Status(fiber.StatusOK)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusOK,
+			"message": "Berhasil",
+			"record":  nil,
+		})
+	} else {
+		c.Status(fiber.StatusOK)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "Failed",
+			"record":  nil,
+		})
+	}
+}
+func Moviefavoritedelete(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_clientmobilesavefavorite)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		log.Println(err.Error())
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		log.Println(errors)
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+	log.Printf("%s - %d", client.Moviefavorite_username, client.Moviefavorite_movieid)
+	flag := models.Delete_moviefavorite(client.Moviefavorite_username, client.Moviefavorite_movieid)
+	if flag {
+		val_favorite := helpers.DeleteRedis(Fieldmovie_mobile_redis + "_favorite_" + client.Moviefavorite_username)
+		log.Printf("Redis Delete MOVIE FAVORITE : %d", val_favorite)
+		c.Status(fiber.StatusOK)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusOK,
+			"message": "Berhasil",
+			"record":  nil,
+		})
+	} else {
+		c.Status(fiber.StatusOK)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "Failed",
+			"record":  nil,
+		})
+	}
+}
+func Moviereportsave(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_clientmobilesavereport)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		log.Println(err.Error())
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		log.Println(errors)
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+	log.Printf("%s - %s - %d", client.Moviereport_username, client.Moviereport_info, client.Moviereport_movieid)
+	flag := models.Save_moviereport(client.Moviereport_username, client.Moviereport_info, client.Moviereport_movieid)
+	if flag {
 		c.Status(fiber.StatusOK)
 		return c.JSON(fiber.Map{
 			"status":  fiber.StatusOK,
