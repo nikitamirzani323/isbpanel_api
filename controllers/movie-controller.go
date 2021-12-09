@@ -26,6 +26,7 @@ const Fieldfrontpagemovie_mobile_redis = "LISTFRONTPAGE-MOBILE"
 const Fieldseason_mobile_redis = "LISTSEASON_MOBILE"
 const Fieldepisode_mobile_redis = "LISTSEASONEPISODE_MOBILE"
 const Fieldmoviecomment_mobile_redis = "LISTMOVIECOMMENT_MOBILE"
+const Fielduser_mobile_redis = "LISTUSER_MOBILE"
 
 func Moviehome(c *fiber.Ctx) error {
 	var errors []*helpers.ErrorResponse
@@ -1125,6 +1126,95 @@ func Moviereportsave(c *fiber.Ctx) error {
 			"status":  fiber.StatusBadRequest,
 			"message": "Failed",
 			"record":  nil,
+		})
+	}
+}
+
+func Movieuserdetail(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_clientmobileuser)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+
+	var obj entities.Model_mobileuser
+	var arraobj []entities.Model_mobileuser
+	render_page := time.Now()
+	resultredis, flag := helpers.GetRedis(Fielduser_mobile_redis + "_" + client.Client_username)
+	jsonredis := []byte(resultredis)
+	message_RD, _ := jsonparser.GetString(jsonredis, "message")
+	record_RD, _, _, _ := jsonparser.Get(jsonredis, "record")
+	jsonparser.ArrayEach(record_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		user_username, _ := jsonparser.GetString(value, "user_username")
+		user_name, _ := jsonparser.GetString(value, "user_name")
+		user_coderef, _ := jsonparser.GetString(value, "user_coderef")
+		user_pointin, _ := jsonparser.GetInt(value, "user_pointin")
+		user_pointout, _ := jsonparser.GetInt(value, "user_pointout")
+
+		obj.User_username = user_username
+		obj.User_name = user_name
+		obj.User_coderef = user_coderef
+		obj.User_pointin = int(user_pointin)
+		obj.User_pointout = int(user_pointout)
+		arraobj = append(arraobj, obj)
+	})
+	var objclaim entities.Model_mobilelistclaim
+	var arraobjclaim []entities.Model_mobilelistclaim
+	claim_RD, _, _, _ := jsonparser.Get(jsonredis, "listclaim")
+	jsonparser.ArrayEach(claim_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		claim_id, _ := jsonparser.GetInt(value, "claim_id")
+		claim_name, _ := jsonparser.GetString(value, "claim_name")
+		claim_point, _ := jsonparser.GetInt(value, "claim_point")
+
+		objclaim.Claim_id = int(claim_id)
+		objclaim.Claim_name = claim_name
+		objclaim.Claim_point = int(claim_point)
+		arraobjclaim = append(arraobjclaim, objclaim)
+	})
+
+	if !flag {
+		result, err := models.Fetch_usermovie(client.Client_username)
+		if err != nil {
+			c.Status(fiber.StatusBadRequest)
+			return c.JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": err.Error(),
+				"record":  nil,
+			})
+		}
+		helpers.SetRedis(Fielduser_mobile_redis+"_"+client.Client_username, result, time.Minute*120)
+		log.Println("MOVIE MOBILE USER DETAIL MYSQL")
+		return c.JSON(result)
+	} else {
+		log.Println("MOVIE MOBILE USER DETAIL CACHE")
+		return c.JSON(fiber.Map{
+			"status":    fiber.StatusOK,
+			"message":   message_RD,
+			"record":    arraobj,
+			"listclaim": arraobjclaim,
+			"time":      time.Since(render_page).String(),
 		})
 	}
 }

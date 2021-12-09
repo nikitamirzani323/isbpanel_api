@@ -26,6 +26,13 @@ type Responsemobilemovie struct {
 	Genre   interface{} `json:"genre"`
 	Time    string      `json:"time"`
 }
+type Responsemobileuser struct {
+	Status  int         `json:"status"`
+	Message string      `json:"message"`
+	Record  interface{} `json:"record"`
+	Claim   interface{} `json:"listclaim"`
+	Time    string      `json:"time"`
+}
 type ResponseAdmin struct {
 	Status   int         `json:"status"`
 	Message  string      `json:"message"`

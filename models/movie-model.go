@@ -985,6 +985,113 @@ func Save_moviereport(username, info string, idmovie int) bool {
 
 	return flag
 }
+func Fetch_usermovie(username string) (helpers.Responsemobileuser, error) {
+	var obj entities.Model_mobileuser
+	var arraobj []entities.Model_mobileuser
+	var res helpers.Responsemobileuser
+	msg := "Data Not Found"
+	con := db.CreateCon()
+	ctx := context.Background()
+	start := time.Now()
+	tglnow, _ := goment.New()
+
+	sql_select := `SELECT 
+		username , nmuser, coderef, 
+		point_in , point_out 
+		FROM ` + config.DB_tbl_trx_user + ` 
+		WHERE username=? 
+	`
+
+	row, err := con.QueryContext(ctx, sql_select, username)
+	helpers.ErrorCheck(err)
+
+	for row.Next() {
+		var (
+			point_in_db, point_out_db          int
+			username_db, nmuser_db, coderef_db string
+		)
+
+		err := row.Scan(&username_db, &nmuser_db, &coderef_db, &point_in_db, &point_out_db)
+		helpers.ErrorCheck(err)
+
+		if coderef_db == "" {
+			flag_coderef := true
+			numbertemp := ""
+			for {
+				numbergenerate := helpers.GenerateNumber(7)
+				flag_coderef = CheckDB(config.DB_tbl_trx_user, "coderef", numbergenerate)
+				if !flag_coderef {
+					numbertemp = numbergenerate
+					break
+				}
+			}
+			if !flag_coderef {
+				sql_update := `
+					UPDATE 
+					` + config.DB_tbl_trx_user + ` 
+					SET coderef=?, updatedateuser=? 
+					WHERE username=? 
+				`
+				log.Println(username)
+				log.Println(numbertemp)
+				flag_update, msg_update := Exec_SQL(sql_update, config.DB_tbl_trx_user, "UPDATE",
+					numbertemp, tglnow.Format("YYYY-MM-DD HH:mm:ss"), username)
+
+				if flag_update {
+					coderef_db = numbertemp
+					log.Println(msg_update)
+
+				} else {
+					log.Println(msg_update)
+				}
+			}
+		}
+
+		obj.User_username = username_db
+		obj.User_name = nmuser_db
+		obj.User_coderef = coderef_db
+		obj.User_pointin = point_in_db
+		obj.User_pointout = point_out_db
+		arraobj = append(arraobj, obj)
+		msg = "Success"
+	}
+	defer row.Close()
+
+	var objclaim entities.Model_mobilelistclaim
+	var arraobjclaim []entities.Model_mobilelistclaim
+	sql_selectlistclaim := `SELECT 
+		idlistclaim , nmlistclaim, pointlistclaim 
+		FROM ` + config.DB_tbl_mst_listclaim + ` 
+		WHERE statuslistclaim='Y' 
+		ORDER BY pointlistclaim ASC 
+	`
+
+	row_listclaim, err_listclaim := con.QueryContext(ctx, sql_selectlistclaim)
+	helpers.ErrorCheck(err_listclaim)
+	for row_listclaim.Next() {
+		var (
+			idlistclaim_db, pointlistclaim_db int
+			nmlistclaim_db                    string
+		)
+
+		err := row_listclaim.Scan(&idlistclaim_db, &nmlistclaim_db, &pointlistclaim_db)
+		helpers.ErrorCheck(err)
+
+		objclaim.Claim_id = idlistclaim_db
+		objclaim.Claim_name = nmlistclaim_db
+		objclaim.Claim_point = pointlistclaim_db
+		arraobjclaim = append(arraobjclaim, objclaim)
+	}
+
+	res.Status = fiber.StatusOK
+	res.Message = msg
+	res.Record = arraobj
+	res.Claim = arraobjclaim
+	res.Time = time.Since(start).String()
+
+	return res, nil
+}
+
 func Save_moviepoint(username, nmpoint string, idmovie, point int) bool {
 	tglnow, _ := goment.New()
 	flag := false

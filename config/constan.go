@@ -15,6 +15,7 @@ const (
 	DB_tbl_mst_tafsirmimpi    string = "tbl_mst_togel_tafsir_mimpi"
 	DB_tbl_mst_point          string = "tbl_mst_point"
 	DB_tbl_mst_report         string = "tbl_mst_report"
+	DB_tbl_mst_listclaim      string = "tbl_mst_listclaim"
 	DB_tbl_trx_keluaran       string = "tbl_trx_keluaran"
 	DB_tbl_trx_prediksi       string = "tbl_trx_prediksi"
 	DB_tbl_trx_news           string = "tbl_trx_news"

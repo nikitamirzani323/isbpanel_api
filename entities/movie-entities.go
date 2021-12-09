@@ -63,6 +63,18 @@ type Model_mobilemoviecomment struct {
 	Movie_comment   string `json:"movie_comment"`
 	Movie_create    string `json:"movie_create"`
 }
+type Model_mobileuser struct {
+	User_username string `json:"user_username"`
+	User_name     string `json:"user_name"`
+	User_coderef  string `json:"user_coderef"`
+	User_pointin  int    `json:"user_pointin"`
+	User_pointout int    `json:"user_pointout"`
+}
+type Model_mobilelistclaim struct {
+	Claim_id    int    `json:"claim_id"`
+	Claim_name  string `json:"claim_name"`
+	Claim_point int    `json:"claim_point"`
+}
 
 type Controller_clientmovie struct {
 	Client_hostname string `json:"client_hostname" validate:"required"`
@@ -114,4 +126,7 @@ type Controller_clientmobilesavereport struct {
 	Moviereport_movieid  int    `form:"moviereport_movieid" validate:"required"`
 	Moviereport_username string `form:"moviereport_username" validate:"required"`
 	Moviereport_info     string `form:"moviereport_info" validate:"required"`
+}
+type Controller_clientmobileuser struct {
+	Client_username string `form:"username" validate:"required"`
 }
