@@ -64,11 +64,12 @@ type Model_mobilemoviecomment struct {
 	Movie_create    string `json:"movie_create"`
 }
 type Model_mobileuser struct {
-	User_username string `json:"user_username"`
-	User_name     string `json:"user_name"`
-	User_coderef  string `json:"user_coderef"`
-	User_pointin  int    `json:"user_pointin"`
-	User_pointout int    `json:"user_pointout"`
+	User_username   string      `json:"user_username"`
+	User_name       string      `json:"user_name"`
+	User_coderef    string      `json:"user_coderef"`
+	User_point      int         `json:"user_point"`
+	Listclaim       interface{} `json:"listclaim"`
+	Listclaimdetail interface{} `json:"listclaimdetail"`
 }
 type Model_mobilelistclaim struct {
 	Claim_id    int    `json:"claim_id"`
@@ -91,6 +92,7 @@ type Controller_episode struct {
 type Controller_clientmobilemovie struct {
 	Client_type     string `form:"type" validate:"required"`
 	Client_username string `form:"username" `
+	Client_search   string `form:"search" `
 }
 type Controller_clientmobilegenremovie struct {
 	Client_genre int `form:"genre" `
@@ -129,4 +131,10 @@ type Controller_clientmobilesavereport struct {
 }
 type Controller_clientmobileuser struct {
 	Client_username string `form:"username" validate:"required"`
+}
+type Controller_clientmobilesaveclaim struct {
+	Claim_idclaim     int    `form:"claim_idclaim" validate:"required"`
+	Claim_username    string `form:"claim_username" validate:"required"`
+	Claim_point       int    `form:"claim_point" validate:"required"`
+	Claim_pointbefore int    `form:"claim_pointbefore" validate:"required"`
 }
