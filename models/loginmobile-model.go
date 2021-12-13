@@ -3,7 +3,6 @@ package models
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"log"
 
 	"github.com/nikitamirzani323/isbpanel_api/config"
@@ -11,7 +10,7 @@ import (
 	"github.com/nleeper/goment"
 )
 
-func Loginmobile_Model(username string) (bool, error) {
+func Loginmobile_Model(username string) bool {
 	con := db.CreateCon()
 	ctx := context.Background()
 	flag := false
@@ -27,14 +26,13 @@ func Loginmobile_Model(username string) (bool, error) {
 	row := con.QueryRowContext(ctx, sql_select, username)
 	switch e := row.Scan(&username); e {
 	case sql.ErrNoRows:
-		return false, errors.New("Username and Password Not Found")
 	case nil:
 		flag = true
 	default:
-		return false, errors.New("Username and Password Not Found")
 	}
 
 	if flag {
+		//UPDATE USER
 		sql_update := `
 			UPDATE ` + config.DB_tbl_trx_user + ` 
 			SET lastlogin=?
@@ -45,12 +43,34 @@ func Loginmobile_Model(username string) (bool, error) {
 			username)
 
 		if flag_update {
-			flag = true
 			log.Println(msg_update)
 		} else {
 			log.Println(msg_update)
 		}
 	}
 
-	return true, nil
+	return flag
+}
+func Mobileversion_Model() string {
+	con := db.CreateCon()
+	ctx := context.Background()
+	version_db := ""
+	sql_select := `
+			SELECT
+			version     
+			FROM ` + config.DB_tbl_mst_version + ` 
+			WHERE idversion  = '1' 
+		`
+
+	row := con.QueryRowContext(ctx, sql_select)
+	switch e := row.Scan(&version_db); e {
+	case sql.ErrNoRows:
+
+	case nil:
+
+	default:
+
+	}
+
+	return version_db
 }

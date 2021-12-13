@@ -1,10 +1,12 @@
 package controllers
 
 import (
+	"log"
 	"strconv"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/nikitamirzani323/isbpanel_api/config"
 	"github.com/nikitamirzani323/isbpanel_api/entities"
 	"github.com/nikitamirzani323/isbpanel_api/helpers"
 	"github.com/nikitamirzani323/isbpanel_api/models"
@@ -38,25 +40,12 @@ func CheckLoginmobile(c *fiber.Ctx) error {
 		})
 	}
 
-	result, err := models.Loginmobile_Model(client.Username)
+	result := models.Loginmobile_Model(client.Username)
+	version := models.Mobileversion_Model()
 
-	if err != nil {
-		c.Status(fiber.StatusBadRequest)
-		return c.JSON(fiber.Map{
-			"status":  fiber.StatusBadRequest,
-			"message": err.Error(),
-			"record":  nil,
-		})
-	}
-
-	if !result {
-		return c.Status(fiber.StatusUnauthorized).JSON(
-			fiber.Map{
-				"status":  fiber.StatusBadRequest,
-				"message": "Username or Password Not Found",
-			})
-
-	} else {
+	if result {
+		flag_point := models.Save_moviepoint(client.Username, "POINT_LOGIN", 0, config.POINT_LOGIN)
+		log.Printf("POINT_LOGIN STATUS : %t", flag_point)
 		dataclient := client.Username + "==" + client.Name + "==" + client.Device
 		dataclient_encr, keymap := helpers.Encryption(dataclient)
 		dataclient_encr_final := dataclient_encr + "|" + strconv.Itoa(keymap)
@@ -67,10 +56,15 @@ func CheckLoginmobile(c *fiber.Ctx) error {
 
 		return c.JSON(fiber.Map{
 			"status":  "Y",
-			"version": "1.1.9",
+			"version": version,
 			"message": "updated",
 			"token":   t,
 		})
-
+	} else {
+		return c.JSON(fiber.Map{
+			"status":  "N",
+			"version": version,
+			"message": "",
+		})
 	}
 }
