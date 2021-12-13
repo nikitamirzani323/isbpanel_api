@@ -10,6 +10,7 @@ import (
 	"github.com/nikitamirzani323/isbpanel_api/entities"
 	"github.com/nikitamirzani323/isbpanel_api/helpers"
 	"github.com/nikitamirzani323/isbpanel_api/models"
+	"github.com/nleeper/goment"
 )
 
 func CheckLoginmobile(c *fiber.Ctx) error {
@@ -44,8 +45,30 @@ func CheckLoginmobile(c *fiber.Ctx) error {
 	version := models.Mobileversion_Model()
 
 	if result {
-		flag_point := models.Save_moviepoint(client.Username, "POINT_LOGIN", 0, config.POINT_LOGIN)
-		log.Printf("POINT_LOGIN STATUS : %t", flag_point)
+		flag_insert := false
+		tglnow, _ := goment.New()
+		tglcreate := models.Get_moviepoint(client.Username, "POINT_LOGIN")
+		log.Println(tglcreate)
+		if tglcreate == "" {
+			flag_insert = true
+		} else {
+			tglcreate2, _ := goment.New(tglcreate)
+			tglstart := tglnow.Format("YYYY-MM-DD") + " 00:00:00"
+			tglend := tglnow.Format("YYYY-MM-DD") + " 23:59:59"
+			tgldbpoint := tglcreate2.Format("YYYY-MM-DD HH:mm:ss")
+
+			log.Printf("data server : %s", tgldbpoint)
+			if tgldbpoint >= tglstart && tgldbpoint <= tglend {
+				flag_insert = false
+			} else {
+				flag_insert = true
+			}
+		}
+		if flag_insert { // UPDATE POINT PER DAY
+			flag_point := models.Save_moviepoint(client.Username, "POINT_LOGIN", 0, config.POINT_LOGIN)
+			log.Printf("POINT_LOGIN STATUS : %t", flag_point)
+		}
+
 		dataclient := client.Username + "==" + client.Name + "==" + client.Device
 		dataclient_encr, keymap := helpers.Encryption(dataclient)
 		dataclient_encr_final := dataclient_encr + "|" + strconv.Itoa(keymap)

@@ -1153,6 +1153,29 @@ func Save_moviepoint(username, nmpoint string, idmovie, point int) bool {
 
 	return flag
 }
+func Get_moviepoint(username, nmpoint string) string {
+	con := db.CreateCon()
+	ctx := context.Background()
+	createdatepoint := ""
+
+	sql_select := `
+			SELECT
+			createdatepoint      
+			FROM ` + config.DB_tbl_mst_point + ` 
+			WHERE username  = ? 
+			AND nmpoint = ? 
+			ORDER BY idpoint DESC LIMIT 1 
+		`
+
+	row := con.QueryRowContext(ctx, sql_select, username, nmpoint)
+	switch e := row.Scan(&createdatepoint); e {
+	case sql.ErrNoRows:
+	case nil:
+	default:
+	}
+
+	return createdatepoint
+}
 func Update_pointmember(username string) bool {
 	tglnow, _ := goment.New()
 	flag := false
