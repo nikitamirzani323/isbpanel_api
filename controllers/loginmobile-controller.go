@@ -41,7 +41,7 @@ func CheckLoginmobile(c *fiber.Ctx) error {
 		})
 	}
 
-	result := models.Loginmobile_Model(client.Username)
+	result := models.Loginmobile_Model(client.Username, client.Name, "LOGIN")
 	version := models.Mobileversion_Model()
 
 	if result {
@@ -84,6 +84,8 @@ func CheckLoginmobile(c *fiber.Ctx) error {
 			"token":   t,
 		})
 	} else {
+		result := models.Loginmobile_Model(client.Username, client.Name, "INSERT")
+		log.Println("RESULT", result)
 		return c.JSON(fiber.Map{
 			"status":  "N",
 			"version": version,
