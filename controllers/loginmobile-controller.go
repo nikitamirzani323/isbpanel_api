@@ -4,12 +4,12 @@ import (
 	"log"
 	"strconv"
 
+	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/config"
+	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/entities"
+	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/helpers"
+	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/models"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
-	"github.com/nikitamirzani323/isbpanel_api/config"
-	"github.com/nikitamirzani323/isbpanel_api/entities"
-	"github.com/nikitamirzani323/isbpanel_api/helpers"
-	"github.com/nikitamirzani323/isbpanel_api/models"
 	"github.com/nleeper/goment"
 )
 

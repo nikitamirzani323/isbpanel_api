@@ -4,11 +4,11 @@ import (
 	"context"
 	"time"
 
+	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/config"
+	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/db"
+	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/entities"
+	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/helpers"
 	"github.com/gofiber/fiber/v2"
-	"github.com/nikitamirzani323/isbpanel_api/config"
-	"github.com/nikitamirzani323/isbpanel_api/db"
-	"github.com/nikitamirzani323/isbpanel_api/entities"
-	"github.com/nikitamirzani323/isbpanel_api/helpers"
 )
 
 func Fetch_newsHome() (helpers.Response, error) {

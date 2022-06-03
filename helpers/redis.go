@@ -12,8 +12,31 @@ import (
 
 var ctx = context.Background()
 
+func RedisHealth() bool {
+	flag := true
+
+	dbHost := os.Getenv("DB_REDIS_HOST") + ":" + os.Getenv("DB_REDIS_PORT")
+	dbPass := os.Getenv("DB_REDIS_PASSWORD")
+	dbName, _ := strconv.Atoi(os.Getenv("DB_REDIS_NAME"))
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     dbHost,
+		Password: dbPass,
+		DB:       dbName,
+	})
+
+	_, err := rdb.Ping(ctx).Result()
+
+	rdb.Close()
+	if err != nil {
+		flag = false
+	}
+
+	return flag
+
+}
+
 func SetRedis(key string, data interface{}, expire time.Duration) {
-	dbHost := os.Getenv("DB_REDIS_HOST")
+	dbHost := os.Getenv("DB_REDIS_HOST") + ":" + os.Getenv("DB_REDIS_PORT")
 	dbPass := os.Getenv("DB_REDIS_PASSWORD")
 	dbName, _ := strconv.Atoi(os.Getenv("DB_REDIS_NAME"))
 
@@ -27,9 +50,10 @@ func SetRedis(key string, data interface{}, expire time.Duration) {
 	rdb.Close()
 	ErrorCheck(err)
 }
+
 func GetRedis(key string) (string, bool) {
 	flag := true
-	dbHost := os.Getenv("DB_REDIS_HOST")
+	dbHost := os.Getenv("DB_REDIS_HOST") + ":" + os.Getenv("DB_REDIS_PORT")
 	dbPass := os.Getenv("DB_REDIS_PASSWORD")
 	dbName, _ := strconv.Atoi(os.Getenv("DB_REDIS_NAME"))
 
@@ -47,7 +71,7 @@ func GetRedis(key string) (string, bool) {
 	return resultredis, flag
 }
 func DeleteRedis(key string) int {
-	dbHost := os.Getenv("DB_REDIS_HOST")
+	dbHost := os.Getenv("DB_REDIS_HOST") + ":" + os.Getenv("DB_REDIS_PORT")
 	dbPass := os.Getenv("DB_REDIS_PASSWORD")
 	dbName, _ := strconv.Atoi(os.Getenv("DB_REDIS_NAME"))
 

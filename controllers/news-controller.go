@@ -4,11 +4,11 @@ import (
 	"log"
 	"time"
 
+	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/entities"
+	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/helpers"
+	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/models"
 	"github.com/buger/jsonparser"
 	"github.com/gofiber/fiber/v2"
-	"github.com/nikitamirzani323/isbpanel_api/entities"
-	"github.com/nikitamirzani323/isbpanel_api/helpers"
-	"github.com/nikitamirzani323/isbpanel_api/models"
 )
 
 const Fieldnews_home_redis = "LISTNEWS_FRONTEND_ISBPANEL"

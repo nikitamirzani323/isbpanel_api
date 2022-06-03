@@ -5,9 +5,9 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/nikitamirzani323/isbpanel_api/config"
-	"github.com/nikitamirzani323/isbpanel_api/db"
-	"github.com/nikitamirzani323/isbpanel_api/helpers"
+	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/config"
+	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/db"
+	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/helpers"
 	"github.com/nleeper/goment"
 )
 
@@ -21,7 +21,7 @@ func Loginmobile_Model(username, name, tipe string) bool {
 			SELECT
 			username     
 			FROM ` + config.DB_tbl_trx_user + ` 
-			WHERE username  = ?
+			WHERE username  = $1
 			AND statususer = "Y" 
 		`
 
@@ -37,8 +37,8 @@ func Loginmobile_Model(username, name, tipe string) bool {
 			//UPDATE USER
 			sql_update := `
 				UPDATE ` + config.DB_tbl_trx_user + ` 
-				SET lastlogin=?
-				WHERE username  = ? 
+				SET lastlogin=$1 
+				WHERE username=$2  
 			`
 			flag_update, msg_update := Exec_SQL(sql_update, config.DB_tbl_trx_user, "UPDATE",
 				tglnow.Format("YYYY-MM-DD HH:mm:ss"),
@@ -64,7 +64,7 @@ func Loginmobile_Model(username, name, tipe string) bool {
 		sql_insert := `
 				INSERT INTO ` + config.DB_tbl_trx_user + ` 
 				(username, nmuser,typeuser,coderef,point_in,point_out,statususer,lastlogin,createdateuser)
-				VALUES (?,?,?,?,?,?,?,?,?)
+				VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
 			`
 		flag_insert, msg_insert := Exec_SQL(sql_insert, config.DB_tbl_trx_user, "INSERT",
 			username, name, "phone", numbertemp, 0, 0, "Y", tglnow.Format("YYYY-MM-DD HH:mm:ss"),

@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
+	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/config"
+	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/db"
+	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/entities"
+	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/helpers"
 	"github.com/gofiber/fiber/v2"
-	"github.com/nikitamirzani323/isbpanel_api/config"
-	"github.com/nikitamirzani323/isbpanel_api/db"
-	"github.com/nikitamirzani323/isbpanel_api/entities"
-	"github.com/nikitamirzani323/isbpanel_api/helpers"
 	"github.com/nleeper/goment"
 )
 
@@ -386,7 +386,7 @@ func Fetch_moviegenre(genre int) (helpers.Response, error) {
 		sql_select += "FROM " + config.DB_tbl_trx_movie + " as A "
 		sql_select += "JOIN " + config.DB_tbl_trx_moviegenre + " as B on B.movieid = A.movieid  "
 		sql_select += "JOIN " + config.DB_tbl_mst_movie_genre + " as C on C.idgenre = B.idgenre  "
-		sql_select += "WHERE C.idgenre=? "
+		sql_select += "WHERE C.idgenre=$1 "
 		sql_select += "ORDER BY RAND() DESC LIMIT 300 "
 		row, err := con.QueryContext(ctx, sql_select, genre)
 		helpers.ErrorCheck(err)
@@ -526,7 +526,7 @@ func Fetch_moviedetail(movieid int, username string) (helpers.Response, error) {
 	sql_select += "movieid, COALESCE(posted_id,0), movietitle, movietype, year, views, urlthumbnail, label, description "
 	sql_select += "FROM " + config.DB_tbl_trx_movie + " "
 	sql_select += "WHERE enabled='1' "
-	sql_select += "AND movieid=? "
+	sql_select += "AND movieid=$1 "
 
 	row, err := con.QueryContext(ctx, sql_select, movieid)
 	helpers.ErrorCheck(err)
@@ -555,7 +555,7 @@ func Fetch_moviedetail(movieid int, username string) (helpers.Response, error) {
 			B.nmgenre   
 			FROM ` + config.DB_tbl_trx_moviegenre + ` as A 
 			JOIN ` + config.DB_tbl_mst_movie_genre + ` as B ON B.idgenre = A.idgenre 
-			WHERE A.movieid = ?    
+			WHERE A.movieid = $1     
 		`
 		row_genre, err_genre := con.QueryContext(ctx, sql_genre, movieid_db)
 		helpers.ErrorCheck(err_genre)
@@ -706,7 +706,7 @@ func Fetch_frontpage() (helpers.Responsemobilemovie, error) {
 			FROM ` + config.DB_tbl_trx_movie + ` as A 
 			JOIN ` + config.DB_tbl_trx_moviegenre + ` as B ON B.movieid = A.movieid  
 			WHERE A.enabled = 1 
-			AND B.idgenre = ?
+			AND B.idgenre = $1 
 			ORDER BY A.createdatemovie DESC LIMIT 10     
 		`
 		row_movie, err_movie := con.QueryContext(ctx, sql_selectmovie, idgenre_db)
@@ -796,7 +796,7 @@ func Fetch_moviecomment(movieid int) (helpers.Response, error) {
 		A.idcomment, B.nmuser , A.comment, A.createcomment 
 		FROM ` + config.DB_tbl_trx_comment + ` as A 
 		JOIN ` + config.DB_tbl_trx_user + ` as B ON B.username = A.username  
-		WHERE A.idposter=?  
+		WHERE A.idposter=$1   
 		AND B.statususer='Y' 
 		ORDER BY A.createcomment DESC LIMIT 100   
 	`
@@ -839,8 +839,8 @@ func Update_movieview(username string, idmovie int) bool {
 	sql_update := `
 			UPDATE 
 			` + config.DB_tbl_trx_movie + `  
-			SET views =? 
-			WHERE movieid =? 
+			SET views=$1  
+			WHERE movieid=$2  
 		`
 
 	flag_update, msg_update := Exec_SQL(sql_update, config.DB_tbl_trx_movie, "UPDATE", viewmovienow, idmovie)
@@ -865,7 +865,7 @@ func Save_moviecomment(username, comment string, idmovie int) bool {
 			` + config.DB_tbl_trx_comment + ` (
 				idcomment , idposter, username, comment, statusread, createcomment
 			) values (
-				?,?,?,?,?,?
+				$1,$2,$3,$4,$5,$6 
 			)
 		`
 	flag_insert, msg_insert := Exec_SQL(sql_insert, config.DB_tbl_trx_comment, "INSERT", tglnow.Format("YY")+strconv.Itoa(idrecord_counter), idmovie, username, comment, "Y", tglnow.Format("YYYY-MM-DD HH:mm:ss"))
@@ -892,7 +892,7 @@ func Save_movierate(username, rating string, idmovie int) bool {
 			` + config.DB_tbl_trx_rate + ` (
 				idrate , username, idposter, ratingposter, createrate
 			) values (
-				?,?,?,?,?
+				$1,$2,$3,$4,$5 
 			)
 		`
 		flag_insert, msg_insert := Exec_SQL(sql_insert, config.DB_tbl_trx_rate, "INSERT",
@@ -922,7 +922,7 @@ func Save_moviefavorite(username string, idmovie int) bool {
 			` + config.DB_tbl_trx_favorite + ` (
 				idfavorite , idposter, username, createfavorite
 			) values (
-				?,?,?,?
+				$1,$2,$3,$4 
 			)
 		`
 		flag_insert, msg_insert := Exec_SQL(sql_insert, config.DB_tbl_trx_favorite, "INSERT",
@@ -947,7 +947,7 @@ func Delete_moviefavorite(username string, idmovie int) bool {
 		sql_delete := `
 			DELETE FROM 
 			` + config.DB_tbl_trx_favorite + ` 
-			WHERE idposter=? AND username=?
+			WHERE idposter=$1 AND username=$2 
 		`
 		flag_delete, msg_delete := Exec_SQL(sql_delete, config.DB_tbl_trx_favorite, "DELETE", idmovie, username)
 
@@ -975,7 +975,7 @@ func Save_moviereport(username, info string, idmovie int) bool {
 			` + config.DB_tbl_mst_report + ` (
 				idreport , idmovie, username, inforeport, poinreport, statusreport, createdatereport 
 			) values (
-				?,?,?,?,?,?,?
+				$1,$2,$3,$4,$5,$6,$7 
 			)
 		`
 	flag_insert, msg_insert := Exec_SQL(sql_insert, config.DB_tbl_trx_favorite, "INSERT",
@@ -1005,7 +1005,7 @@ func Fetch_usermovie(username string) (helpers.Response, error) {
 		username , nmuser, coderef, 
 		point_in , point_out 
 		FROM ` + config.DB_tbl_trx_user + ` 
-		WHERE username=? 
+		WHERE username=$1  
 	`
 
 	row, err := con.QueryContext(ctx, sql_select, username)
@@ -1035,8 +1035,8 @@ func Fetch_usermovie(username string) (helpers.Response, error) {
 				sql_update := `
 					UPDATE 
 					` + config.DB_tbl_trx_user + ` 
-					SET coderef=?, updatedateuser=? 
-					WHERE username=? 
+					SET coderef=$1, updatedateuser=$2  
+					WHERE username=$3  
 				`
 				log.Println(username)
 				log.Println(numbertemp)
@@ -1107,8 +1107,8 @@ func Save_userclaim(username string, idlistclaim, point, pointbefore int) bool {
 				idclaimuser , idlistclaim, poinlistclaimtemp, username, pointbefore, statusclaimuser, 
 				createclaimuser , createdateclaimuser
 			) values (
-				?,?,?,?,?,?,
-				?,?
+				$1,$2,$3,$4,$5,$6,
+				$7,$8 
 			)
 		`
 	flag_insert, msg_insert := Exec_SQL(sql_insert, config.DB_tbl_mst_listclaim_user, "INSERT",
@@ -1136,7 +1136,7 @@ func Save_moviepoint(username, nmpoint string, idmovie, point int) bool {
 			` + config.DB_tbl_mst_point + ` (
 				idpoint , username, nmpoint, posted_id, point, createdatepoint
 			) values (
-				?,?,?,?,?,?
+				$1,$2,$3,$4,$5,$6 
 			)
 		`
 	flag_insert, msg_insert := Exec_SQL(sql_insert, config.DB_tbl_mst_point, "INSERT",
@@ -1162,8 +1162,8 @@ func Get_moviepoint(username, nmpoint string) string {
 			SELECT
 			createdatepoint      
 			FROM ` + config.DB_tbl_mst_point + ` 
-			WHERE username  = ? 
-			AND nmpoint = ? 
+			WHERE username  = $1  
+			AND nmpoint = $2  
 			ORDER BY idpoint DESC LIMIT 1 
 		`
 
@@ -1185,8 +1185,8 @@ func Update_pointmember(username string) bool {
 	sql_update := `
 		UPDATE 
 		` + config.DB_tbl_trx_user + ` 
-		SET point_in=?, updatedateuser=? 
-		WHERE username=? 
+		SET point_in=$1, updatedateuser=$2  
+		WHERE username=$3  
 	`
 	log.Println(username)
 	log.Println(point_total)
@@ -1212,7 +1212,7 @@ func _GetMedia(idrecord int) (string, string) {
 	sql_select := `SELECT
 		url, extension   
 		FROM ` + config.DB_tbl_mst_mediatable + `  
-		WHERE idmediatable = ? 
+		WHERE idmediatable = $1  
 	`
 	row := con.QueryRowContext(ctx, sql_select, idrecord)
 	switch e := row.Scan(&url, &extension); e {
@@ -1234,7 +1234,7 @@ func _GetVideo(idrecord int, tipe string) (interface{}, int, string) {
 	sql_select += "SELECT "
 	sql_select += "url "
 	sql_select += "FROM " + config.DB_tbl_mst_movie_source + " "
-	sql_select += "WHERE poster_id = ? "
+	sql_select += "WHERE poster_id = $1 "
 	if tipe == "single" {
 		sql_select += "ORDER BY RAND() DESC LIMIT 1 "
 	}
@@ -1261,7 +1261,7 @@ func _GetVideoEpisode(idrecord int) string {
 	sql_select := `SELECT
 		url   
 		FROM ` + config.DB_tbl_mst_movie_source + `  
-		WHERE episode_id = ? 
+		WHERE episode_id = $1  
 	`
 	row := con.QueryRowContext(ctx, sql_select, idrecord)
 	switch e := row.Scan(&url); e {
@@ -1280,7 +1280,7 @@ func _GetMovie(idrecord int, tipe string) int {
 	sql_select := `SELECT
 		views    
 		FROM ` + config.DB_tbl_trx_movie + `  
-		WHERE movieid = ? 
+		WHERE movieid = $1  
 	`
 	row := con.QueryRowContext(ctx, sql_select, idrecord)
 	switch e := row.Scan(&views); e {
@@ -1299,7 +1299,7 @@ func _GetPoint_In(username string) int {
 	sql_select := `SELECT
 		SUM(point) as totalpoint     
 		FROM ` + config.DB_tbl_mst_point + `  
-		WHERE username = ? 
+		WHERE username = $1  
 	`
 	row := con.QueryRowContext(ctx, sql_select, username)
 	switch e := row.Scan(&totalpoint); e {
@@ -1319,7 +1319,7 @@ func _GetFavorite(idrecord int, username string) string {
 	sql_select := `SELECT
 		idfavorite   
 		FROM ` + config.DB_tbl_trx_favorite + `  
-		WHERE idposter = ? AND username=? 
+		WHERE idposter = $1 AND username=$2  
 	`
 	row := con.QueryRowContext(ctx, sql_select, idrecord, username)
 	switch e := row.Scan(&idfavorite); e {

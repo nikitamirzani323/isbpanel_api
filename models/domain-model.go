@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/nikitamirzani323/isbpanel_api/config"
-	"github.com/nikitamirzani323/isbpanel_api/db"
+	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/config"
+	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/db"
 )
 
 func Get_Domain(nmdomain string) bool {
@@ -17,7 +17,7 @@ func Get_Domain(nmdomain string) bool {
 	sql_select := `SELECT
 		statusdomain  
 		FROM ` + config.DB_tbl_mst_domain + `  
-		WHERE nmdomain = ? 
+		WHERE nmdomain = $1 
 		AND statusdomain = 'RUNNING' 
 	`
 	row := con.QueryRowContext(ctx, sql_select, nmdomain)

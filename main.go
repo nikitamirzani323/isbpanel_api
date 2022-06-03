@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/nikitamirzani323/isbpanel_api/db"
-	"github.com/nikitamirzani323/isbpanel_api/routers"
+	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/db"
+	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/routers"
 )
 
 func main() {

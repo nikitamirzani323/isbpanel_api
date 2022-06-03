@@ -6,11 +6,11 @@ import (
 	"strconv"
 	"time"
 
+	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/config"
+	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/db"
+	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/entities"
+	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/helpers"
 	"github.com/gofiber/fiber/v2"
-	"github.com/nikitamirzani323/isbpanel_api/config"
-	"github.com/nikitamirzani323/isbpanel_api/db"
-	"github.com/nikitamirzani323/isbpanel_api/entities"
-	"github.com/nikitamirzani323/isbpanel_api/helpers"
 	"github.com/nleeper/goment"
 )
 
@@ -49,7 +49,7 @@ func Fetch_pasaranHome() (helpers.Response, error) {
 		sql_selectpasaran := `SELECT 
 			datekeluaran , nomorkeluaran
 			FROM ` + config.DB_tbl_trx_keluaran + ` 
-			WHERE idpasarantogel = ? 
+			WHERE idpasarantogel = $1  
 			ORDER BY datekeluaran DESC LIMIT 1
 		`
 		row_keluaran := con.QueryRowContext(ctx, sql_selectpasaran, idpasarantogel_db)
@@ -63,7 +63,7 @@ func Fetch_pasaranHome() (helpers.Response, error) {
 		sql_selectprediksi := `SELECT 
 			dateprediksi , bbfsprediksi, nomorprediksi
 			FROM ` + config.DB_tbl_trx_prediksi + ` 
-			WHERE idpasarantogel = ? 
+			WHERE idpasarantogel = $1  
 			ORDER BY dateprediksi DESC LIMIT 1
 		`
 		row_prediksi := con.QueryRowContext(ctx, sql_selectprediksi, idpasarantogel_db)
@@ -112,9 +112,9 @@ func Fetch_keluaran(idpasaran string) (helpers.ResponseKeluaran, error) {
 	sql_select := `SELECT 
 			datekeluaran , periodekeluaran ,nomorkeluaran
 			FROM ` + config.DB_tbl_trx_keluaran + ` 
-			WHERE idpasarantogel=? 
-			AND datekeluaran >= ? 
-			AND datekeluaran <= ? 
+			WHERE idpasarantogel=$1  
+			AND datekeluaran >= $2  
+			AND datekeluaran <= $3  
 			ORDER BY datekeluaran DESC   
 		`
 
