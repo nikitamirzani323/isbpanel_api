@@ -1,0 +1,10 @@
+version: '2'
+
+services:
+  isbpanel-api-client:
+    container_name: isbpanel-api-client
+    image: isbpanel-api-client:0.0.1
+    build: .
+    ports:
+      - 5051:5051
+    restart: always
