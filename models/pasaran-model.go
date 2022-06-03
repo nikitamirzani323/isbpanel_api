@@ -25,7 +25,7 @@ func Fetch_pasaranHome() (helpers.Response, error) {
 
 	sql_select := `SELECT 
 			idpasarantogel , nmpasarantogel, 
-			urlpasaran , pasarandiundi, jamjadwal 
+			urlpasaran , pasarandiundi, jamjadwal::text as jamjadwal  
 			FROM ` + config.DB_tbl_mst_pasaran + ` 
 			WHERE statuspasaran = 'Y' 
 			ORDER BY displaypasaran ASC  
@@ -47,7 +47,7 @@ func Fetch_pasaranHome() (helpers.Response, error) {
 			dateprediksi_db, bbfsprediksi_db, nomorprediksi_db string
 		)
 		sql_selectpasaran := `SELECT 
-			datekeluaran , nomorkeluaran
+			to_char(datekeluaran, 'YYYY-MM-DD') , nomorkeluaran
 			FROM ` + config.DB_tbl_trx_keluaran + ` 
 			WHERE idpasarantogel = $1  
 			ORDER BY datekeluaran DESC LIMIT 1
@@ -61,7 +61,7 @@ func Fetch_pasaranHome() (helpers.Response, error) {
 		}
 
 		sql_selectprediksi := `SELECT 
-			dateprediksi , bbfsprediksi, nomorprediksi
+			to_char(dateprediksi, 'YYYY-MM-DD') , bbfsprediksi, nomorprediksi
 			FROM ` + config.DB_tbl_trx_prediksi + ` 
 			WHERE idpasarantogel = $1  
 			ORDER BY dateprediksi DESC LIMIT 1
@@ -110,7 +110,7 @@ func Fetch_keluaran(idpasaran string) (helpers.ResponseKeluaran, error) {
 	endyear := tglnow.Format("YYYY") + "-12-31"
 
 	sql_select := `SELECT 
-			datekeluaran , periodekeluaran ,nomorkeluaran
+			to_char(datekeluaran, 'YYYY-MM-DD') as datekeluaran , periodekeluaran ,nomorkeluaran
 			FROM ` + config.DB_tbl_trx_keluaran + ` 
 			WHERE idpasarantogel=$1  
 			AND datekeluaran >= $2  
