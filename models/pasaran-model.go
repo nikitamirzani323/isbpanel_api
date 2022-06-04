@@ -30,7 +30,7 @@ func Fetch_pasaranHome() (helpers.Response, error) {
 			FROM ` + config.DB_tbl_mst_pasaran + ` 
 			WHERE statuspasaran = 'Y' 
 			ORDER BY displaypasaran ASC  
-		`
+	`
 
 	row, err := con.QueryContext(ctx, sql_select)
 	helpers.ErrorCheck(err)
@@ -122,13 +122,38 @@ func Fetch_keluaran(idpasaran string) (helpers.ResponseKeluaran, error) {
 	pasarantitle := ""
 	pasarandescp := ""
 
+	var obj_pasaransimple entities.Model_pasaransimple
+	var arraobj_pasaransimple []entities.Model_pasaransimple
+	sql_selectpasaran := `SELECT 
+			nmpasarantogel, slugpasaran, urlpasaran   
+			FROM ` + config.DB_tbl_mst_pasaran + ` 
+			WHERE statuspasaran = 'Y' 
+			ORDER BY displaypasaran ASC  
+	`
+
+	row_pasaran, err_pasaran := con.QueryContext(ctx, sql_selectpasaran)
+	helpers.ErrorCheck(err_pasaran)
+	for row_pasaran.Next() {
+		var (
+			nmpasarantogel_db, slugpasaran_db, urlpasaran_db string
+		)
+
+		err_pasaran = row_pasaran.Scan(&nmpasarantogel_db, &slugpasaran_db, &urlpasaran_db)
+
+		helpers.ErrorCheck(err_pasaran)
+		obj_pasaransimple.Pasaran_name = nmpasarantogel_db
+		obj_pasaransimple.Pasaran_slug = slugpasaran_db
+		obj_pasaransimple.Pasaran_url = urlpasaran_db
+		arraobj_pasaransimple = append(arraobj_pasaransimple, obj_pasaransimple)
+	}
+
 	sql_detail := `SELECT 
 			nmpasarantogel , urlpasaran , pasarandiundi , jamjadwal::text as jamjadwal, 
 			pasaran_meta_title, pasaran_meta_descp 
 			FROM ` + config.DB_tbl_mst_pasaran + ` 
 			WHERE slugpasaran=$1  
 			AND statuspasaran='Y'   
-		`
+	`
 	row_detail, err_detail := con.QueryContext(ctx, sql_detail, idpasaran)
 	helpers.ErrorCheck(err_detail)
 	for row_detail.Next() {
@@ -224,6 +249,7 @@ func Fetch_keluaran(idpasaran string) (helpers.ResponseKeluaran, error) {
 	res.Record = arraobj
 	res.Pasaran = nmpasaran
 	res.Livedraw = urlpasaran
+	res.List_pasaran = arraobj_pasaransimple
 	res.Pasarandiundi = pasarandiundi
 	res.Pasaranjadwal = pasaranjamjadwal
 	res.Pasaran_title = pasarantitle

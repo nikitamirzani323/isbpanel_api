@@ -107,6 +107,8 @@ func Keluaranhome(c *fiber.Ctx) error {
 
 	var obj entities.Model_keluaran
 	var arraobj []entities.Model_keluaran
+	var obj_pasaransimple entities.Model_pasaransimple
+	var arraobj_pasaransimple []entities.Model_pasaransimple
 	var obj_minggu entities.Model_keluaranpaitominggu
 	var arraobj_minggu []entities.Model_keluaranpaitominggu
 	var obj_senin entities.Model_keluaranpaitosenin
@@ -131,6 +133,7 @@ func Keluaranhome(c *fiber.Ctx) error {
 	pasaran_jadwal, _ := jsonparser.GetString(jsonredis, "pasaran_jadwal")
 	pasaran_title, _ := jsonparser.GetString(jsonredis, "pasaran_title")
 	pasaran_descp, _ := jsonparser.GetString(jsonredis, "pasaran_descp")
+	list_pasaran_RD, _, _, _ := jsonparser.Get(jsonredis, "list_pasaran")
 	record_RD, _, _, _ := jsonparser.Get(jsonredis, "record")
 	paito_minggu_RD, _, _, _ := jsonparser.Get(jsonredis, "paito_minggu")
 	paito_senin_RD, _, _, _ := jsonparser.Get(jsonredis, "paito_senin")
@@ -148,6 +151,16 @@ func Keluaranhome(c *fiber.Ctx) error {
 		obj.Keluaran_periode = keluaran_periode
 		obj.Keluaran_nomor = keluaran_nomor
 		arraobj = append(arraobj, obj)
+	})
+	jsonparser.ArrayEach(list_pasaran_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		pasaran_name, _ := jsonparser.GetString(value, "pasaran_name")
+		pasaran_url, _ := jsonparser.GetString(value, "pasaran_url")
+		pasaran_slug, _ := jsonparser.GetString(value, "pasaran_slug")
+
+		obj_pasaransimple.Pasaran_name = pasaran_name
+		obj_pasaransimple.Pasaran_url = pasaran_url
+		obj_pasaransimple.Pasaran_slug = pasaran_slug
+		arraobj_pasaransimple = append(arraobj_pasaransimple, obj_pasaransimple)
 	})
 	jsonparser.ArrayEach(paito_minggu_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		keluaran_nomor, _ := jsonparser.GetString(value, "keluaran_nomor")
@@ -208,6 +221,7 @@ func Keluaranhome(c *fiber.Ctx) error {
 			"pasaran_jadwal":   pasaran_jadwal,
 			"pasaran_title":    pasaran_title,
 			"pasaran_descp":    pasaran_descp,
+			"list_pasaran":     arraobj_pasaransimple,
 			"record":           arraobj,
 			"paito_minggu":     arraobj_minggu,
 			"paito_senin":      arraobj_senin,

@@ -23,6 +23,7 @@ type ResponseKeluaran struct {
 	Paito_kamis   interface{} `json:"paito_kamis"`
 	Paito_jumat   interface{} `json:"paito_jumat"`
 	Paito_sabtu   interface{} `json:"paito_sabtu"`
+	List_pasaran  interface{} `json:"list_pasaran"`
 	Time          string      `json:"time"`
 }
 type Responsemobilemovie struct {

@@ -15,6 +15,11 @@ type Model_pasaran struct {
 	Pasaran_bbfsprediksi  string `json:"pasaran_bbfsprediksi"`
 	Pasaran_nomorprediksi string `json:"pasaran_nomorprediksi"`
 }
+type Model_pasaransimple struct {
+	Pasaran_name string `json:"pasaran_name"`
+	Pasaran_url  string `json:"pasaran_url"`
+	Pasaran_slug string `json:"pasaran_slug"`
+}
 type Model_keluaran struct {
 	Keluaran_datekeluaran string `json:"keluaran_datekeluaran"`
 	Keluaran_periode      string `json:"keluaran_periode"`
