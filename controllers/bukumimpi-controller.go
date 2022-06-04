@@ -15,6 +15,8 @@ const Field_bukumimpihome_redis = "LISTBUKUMIMPI_FRONTEND_ISBPANEL"
 const Field_tafsirmimpihome_redis = "LISTTAFSIRMIMPI_FRONTEND_ISBPANEL"
 
 func Bukumimpihome(c *fiber.Ctx) error {
+	hostname := c.Hostname()
+	log.Println(hostname)
 	client := new(entities.Controller_clienrequest)
 	if err := c.BodyParser(client); err != nil {
 		return err

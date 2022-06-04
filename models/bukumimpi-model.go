@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/config"
@@ -26,7 +27,7 @@ func Fetch_bukumimpiHome(tipe, nama string) (helpers.Response, error) {
 		sql_select += "typebukumimpi, nmbukumimpi, nmrbukumimpi "
 		sql_select += "FROM " + config.DB_tbl_trx_bukumimpi + " "
 		if nama != "" {
-			sql_select += "WHERE LOWER(nmbukumimpi) LIKE '%" + nama + "%' "
+			sql_select += "WHERE LOWER(nmbukumimpi) LIKE '%" + strings.ToLower(nama) + "%' "
 			sql_select += "ORDER BY nmbukumimpi ASC LIMIT 500 "
 		} else {
 			sql_select += "ORDER BY random() LIMIT 500 "
@@ -38,7 +39,7 @@ func Fetch_bukumimpiHome(tipe, nama string) (helpers.Response, error) {
 		sql_select += "typebukumimpi, nmbukumimpi, nmrbukumimpi "
 		sql_select += "FROM " + config.DB_tbl_trx_bukumimpi + " "
 		if nama != "" {
-			sql_select += "WHERE LOWER(nmbukumimpi) LIKE '%" + nama + "%' "
+			sql_select += "WHERE LOWER(nmbukumimpi) LIKE '%" + strings.ToLower(nama) + "%' "
 			sql_select += "AND typebukumimpi='" + tipe + "' "
 		} else {
 			sql_select += "WHERE typebukumimpi='" + tipe + "' "
@@ -94,8 +95,8 @@ func Fetch_tafsirmimpiHome(search string) (helpers.Response, error) {
 		sql_select += "mimpi, artimimpi, angka2d, angka3d, angka4d "
 		sql_select += "FROM " + config.DB_tbl_mst_tafsirmimpi + " "
 		sql_select += "WHERE statustafsirmimpi = 'Y' "
-		sql_select += "AND LOWER(mimpi) LIKE '%" + search + "%' "
-		sql_select += "OR LOWER(artimimpi) LIKE '%" + search + "%' "
+		sql_select += "AND LOWER(mimpi) LIKE '%" + strings.ToLower(search) + "%' "
+		sql_select += "OR LOWER(artimimpi) LIKE '%" + strings.ToLower(search) + "%' "
 		sql_select += "ORDER BY mimpi ASC LIMIT 500  "
 	}
 
