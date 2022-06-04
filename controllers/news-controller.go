@@ -44,7 +44,7 @@ func Newshome(c *fiber.Ctx) error {
 				"record":  nil,
 			})
 		}
-		helpers.SetRedis(Fieldnews_home_redis, result, 0)
+		helpers.SetRedis(Fieldnews_home_redis, result, 60*time.Minute)
 		log.Println("NEWS MYSQL")
 		return c.JSON(result)
 	} else {
@@ -87,7 +87,7 @@ func Newsmoviehome(c *fiber.Ctx) error {
 				"record":  nil,
 			})
 		}
-		helpers.SetRedis(Fieldnewsmovie_home_redis, result, 0)
+		helpers.SetRedis(Fieldnewsmovie_home_redis, result, 60*time.Minute)
 		log.Println("NEWS MOVIE MYSQL")
 		return c.JSON(result)
 	} else {

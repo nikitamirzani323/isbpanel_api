@@ -3,7 +3,7 @@ version: '2'
 services:
   isbpanel-api-client:
     container_name: isbpanel-api-client
-    image: isbpanel-api-client:0.0.4
+    image: isbpanel-api-client:0.0.5
     build: .
     ports:
       - 5051:5051
