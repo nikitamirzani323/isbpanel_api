@@ -30,6 +30,9 @@ func Pasaranhome(c *fiber.Ctx) error {
 		pasaran_diundi, _ := jsonparser.GetString(value, "pasaran_diundi")
 		pasaran_jamjadwal, _ := jsonparser.GetString(value, "pasaran_jamjadwal")
 		pasaran_datekeluaran, _ := jsonparser.GetString(value, "pasaran_datekeluaran")
+		pasaran_slug, _ := jsonparser.GetString(value, "pasaran_slug")
+		pasaran_meta_title, _ := jsonparser.GetString(value, "pasaran_meta_title")
+		pasaran_meta_descp, _ := jsonparser.GetString(value, "pasaran_meta_descp")
 		pasaran_keluaran, _ := jsonparser.GetString(value, "pasaran_keluaran")
 		pasaran_dateprediksi, _ := jsonparser.GetString(value, "pasaran_dateprediksi")
 		pasaran_bbfsprediksi, _ := jsonparser.GetString(value, "pasaran_bbfsprediksi")
@@ -40,6 +43,9 @@ func Pasaranhome(c *fiber.Ctx) error {
 		obj.Pasaran_url = pasaran_url
 		obj.Pasaran_diundi = pasaran_diundi
 		obj.Pasaran_jamjadwal = pasaran_jamjadwal
+		obj.Pasaran_slug = pasaran_slug
+		obj.Pasaran_meta_title = pasaran_meta_title
+		obj.Pasaran_meta_descp = pasaran_meta_descp
 		obj.Pasaran_datekeluaran = pasaran_datekeluaran
 		obj.Pasaran_keluaran = pasaran_keluaran
 		obj.Pasaran_dateprediksi = pasaran_dateprediksi
@@ -57,7 +63,7 @@ func Pasaranhome(c *fiber.Ctx) error {
 				"record":  nil,
 			})
 		}
-		helpers.SetRedis(Field_home_redis, result, 0)
+		helpers.SetRedis(Field_home_redis, result, 60*time.Minute)
 		log.Println("PASARAN MYSQL")
 		return c.JSON(result)
 	} else {
@@ -119,6 +125,12 @@ func Keluaranhome(c *fiber.Ctx) error {
 	resultredis, flag := helpers.GetRedis(Field_keluaran_redis + "_" + client.Pasaran_id)
 	jsonredis := []byte(resultredis)
 	message_RD, _ := jsonparser.GetString(jsonredis, "message")
+	pasaran_nama, _ := jsonparser.GetString(jsonredis, "pasaran_nama")
+	pasaran_livedraw, _ := jsonparser.GetString(jsonredis, "pasaran_livedraw")
+	pasaran_diundi, _ := jsonparser.GetString(jsonredis, "pasaran_diundi")
+	pasaran_jadwal, _ := jsonparser.GetString(jsonredis, "pasaran_jadwal")
+	pasaran_title, _ := jsonparser.GetString(jsonredis, "pasaran_title")
+	pasaran_descp, _ := jsonparser.GetString(jsonredis, "pasaran_descp")
 	record_RD, _, _, _ := jsonparser.Get(jsonredis, "record")
 	paito_minggu_RD, _, _, _ := jsonparser.Get(jsonredis, "paito_minggu")
 	paito_senin_RD, _, _, _ := jsonparser.Get(jsonredis, "paito_senin")
@@ -182,23 +194,29 @@ func Keluaranhome(c *fiber.Ctx) error {
 				"record":  nil,
 			})
 		}
-		helpers.SetRedis(Field_keluaran_redis+"_"+client.Pasaran_id, result, 0)
+		helpers.SetRedis(Field_keluaran_redis+"_"+client.Pasaran_id, result, 60*time.Minute)
 		log.Println("KELUARAN MYSQL")
 		return c.JSON(result)
 	} else {
 		log.Println("KELUARAN CACHE")
 		return c.JSON(fiber.Map{
-			"status":       fiber.StatusOK,
-			"message":      message_RD,
-			"record":       arraobj,
-			"paito_minggu": arraobj_minggu,
-			"paito_senin":  arraobj_senin,
-			"paito_selasa": arraobj_selasa,
-			"paito_rabu":   arraobj_rabu,
-			"paito_kamis":  arraobj_kamis,
-			"paito_jumat":  arraobj_jumat,
-			"paito_sabtu":  arraobj_sabtu,
-			"time":         time.Since(render_page).String(),
+			"status":           fiber.StatusOK,
+			"message":          message_RD,
+			"pasaran_nama":     pasaran_nama,
+			"pasaran_livedraw": pasaran_livedraw,
+			"pasaran_diundi":   pasaran_diundi,
+			"pasaran_jadwal":   pasaran_jadwal,
+			"pasaran_title":    pasaran_title,
+			"pasaran_descp":    pasaran_descp,
+			"record":           arraobj,
+			"paito_minggu":     arraobj_minggu,
+			"paito_senin":      arraobj_senin,
+			"paito_selasa":     arraobj_selasa,
+			"paito_rabu":       arraobj_rabu,
+			"paito_kamis":      arraobj_kamis,
+			"paito_jumat":      arraobj_jumat,
+			"paito_sabtu":      arraobj_sabtu,
+			"time":             time.Since(render_page).String(),
 		})
 	}
 }

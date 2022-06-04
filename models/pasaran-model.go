@@ -25,7 +25,8 @@ func Fetch_pasaranHome() (helpers.Response, error) {
 
 	sql_select := `SELECT 
 			idpasarantogel , nmpasarantogel, 
-			urlpasaran , pasarandiundi, jamjadwal::text as jamjadwal  
+			urlpasaran , pasarandiundi, jamjadwal::text as jamjadwal, 
+			slugpasaran, pasaran_meta_title, pasaran_meta_descp   
 			FROM ` + config.DB_tbl_mst_pasaran + ` 
 			WHERE statuspasaran = 'Y' 
 			ORDER BY displaypasaran ASC  
@@ -36,9 +37,11 @@ func Fetch_pasaranHome() (helpers.Response, error) {
 	for row.Next() {
 		var (
 			idpasarantogel_db, nmpasarantogel_db, urlpasaran_db, pasarandiundi_db, jamjadwal_db string
+			slugpasaran_db, pasaran_meta_title_db, pasaran_meta_descp_db                        string
 		)
 
-		err = row.Scan(&idpasarantogel_db, &nmpasarantogel_db, &urlpasaran_db, &pasarandiundi_db, &jamjadwal_db)
+		err = row.Scan(&idpasarantogel_db, &nmpasarantogel_db, &urlpasaran_db, &pasarandiundi_db, &jamjadwal_db,
+			&slugpasaran_db, &pasaran_meta_title_db, &pasaran_meta_descp_db)
 
 		helpers.ErrorCheck(err)
 
@@ -81,6 +84,9 @@ func Fetch_pasaranHome() (helpers.Response, error) {
 		obj.Pasaran_jamjadwal = jamjadwal_db
 		obj.Pasaran_datekeluaran = datekeluaran_db
 		obj.Pasaran_keluaran = nomorkeluaran_db
+		obj.Pasaran_slug = slugpasaran_db
+		obj.Pasaran_meta_title = pasaran_meta_title_db
+		obj.Pasaran_meta_descp = pasaran_meta_descp_db
 		obj.Pasaran_dateprediksi = dateprediksi_db
 		obj.Pasaran_bbfsprediksi = bbfsprediksi_db
 		obj.Pasaran_nomorprediksi = nomorprediksi_db
@@ -109,13 +115,47 @@ func Fetch_keluaran(idpasaran string) (helpers.ResponseKeluaran, error) {
 	startyear := tglnow.Format("YYYY") + "-01-01"
 	endyear := tglnow.Format("YYYY") + "-12-31"
 
+	nmpasaran := ""
+	urlpasaran := ""
+	pasarandiundi := ""
+	pasaranjamjadwal := ""
+	pasarantitle := ""
+	pasarandescp := ""
+
+	sql_detail := `SELECT 
+			nmpasarantogel , urlpasaran , pasarandiundi , jamjadwal::text as jamjadwal, 
+			pasaran_meta_title, pasaran_meta_descp 
+			FROM ` + config.DB_tbl_mst_pasaran + ` 
+			WHERE slugpasaran=$1  
+			AND statuspasaran='Y'   
+		`
+	row_detail, err_detail := con.QueryContext(ctx, sql_detail, idpasaran)
+	helpers.ErrorCheck(err_detail)
+	for row_detail.Next() {
+		var (
+			nmpasarantogel_db, urlpasaran_db, pasarandiundi_db, jamjadwal_db string
+			pasaran_meta_title_db, pasaran_meta_descp_db                     string
+		)
+		err_detail = row_detail.Scan(&nmpasarantogel_db, &urlpasaran_db, &pasarandiundi_db, &jamjadwal_db,
+			&pasaran_meta_title_db, &pasaran_meta_descp_db)
+		helpers.ErrorCheck(err_detail)
+
+		nmpasaran = nmpasarantogel_db
+		urlpasaran = urlpasaran_db
+		pasarandiundi = pasarandiundi_db
+		pasaranjamjadwal = jamjadwal_db
+		pasarantitle = pasaran_meta_title_db
+		pasarandescp = pasaran_meta_descp_db
+	}
+
 	sql_select := `SELECT 
-			to_char(datekeluaran, 'YYYY-MM-DD') as datekeluaran , periodekeluaran ,nomorkeluaran
-			FROM ` + config.DB_tbl_trx_keluaran + ` 
-			WHERE idpasarantogel=$1  
-			AND datekeluaran >= $2  
-			AND datekeluaran <= $3  
-			ORDER BY datekeluaran DESC   
+			A.idpasarantogel , to_char(A.datekeluaran, 'YYYY-MM-DD') as datekeluaran , A.periodekeluaran ,A.nomorkeluaran 
+			FROM ` + config.DB_tbl_trx_keluaran + ` as A 
+			JOIN ` + config.DB_tbl_mst_pasaran + ` as B ON B.idpasarantogel = A.idpasarantogel 
+			WHERE B.slugpasaran=$1  
+			AND A.datekeluaran >= $2  
+			AND A.datekeluaran <= $3  
+			ORDER BY A.datekeluaran DESC   
 		`
 
 	row, err := con.QueryContext(ctx, sql_select, idpasaran, startyear, endyear)
@@ -136,10 +176,10 @@ func Fetch_keluaran(idpasaran string) (helpers.ResponseKeluaran, error) {
 	var arraobjpaito_sabtu []entities.Model_keluaranpaitosabtu
 	for row.Next() {
 		var (
-			datekeluaran_db, periodekeluaran_db, nomorkeluaran_db string
+			idpasarantogel_db, datekeluaran_db, periodekeluaran_db, nomorkeluaran_db string
 		)
 
-		err = row.Scan(&datekeluaran_db, &periodekeluaran_db, &nomorkeluaran_db)
+		err = row.Scan(&idpasarantogel_db, &datekeluaran_db, &periodekeluaran_db, &nomorkeluaran_db)
 		helpers.ErrorCheck(err)
 
 		tgldatekeluaran, _ := goment.New(datekeluaran_db)
@@ -171,7 +211,7 @@ func Fetch_keluaran(idpasaran string) (helpers.ResponseKeluaran, error) {
 			arraobjpaito_sabtu = append(arraobjpaito_sabtu, objpaito_sabtu)
 		}
 		obj.Keluaran_datekeluaran = datekeluaran_db
-		obj.Keluaran_periode = idpasaran + "-" + periodekeluaran_db
+		obj.Keluaran_periode = idpasarantogel_db + "-" + periodekeluaran_db
 		obj.Keluaran_nomor = nomorkeluaran_db
 		arraobj = append(arraobj, obj)
 		nomorkeluaran_db = ""
@@ -182,6 +222,12 @@ func Fetch_keluaran(idpasaran string) (helpers.ResponseKeluaran, error) {
 	res.Status = fiber.StatusOK
 	res.Message = msg
 	res.Record = arraobj
+	res.Pasaran = nmpasaran
+	res.Livedraw = urlpasaran
+	res.Pasarandiundi = pasarandiundi
+	res.Pasaranjadwal = pasaranjamjadwal
+	res.Pasaran_title = pasarantitle
+	res.Pasaran_descp = pasarandescp
 	res.Paito_minggu = arraobjpaito_minggu
 	res.Paito_senin = arraobjpaito_senin
 	res.Paito_selasa = arraobjpaito_selasa

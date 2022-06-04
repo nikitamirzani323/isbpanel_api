@@ -7,17 +7,23 @@ type Response struct {
 	Time    string      `json:"time"`
 }
 type ResponseKeluaran struct {
-	Status       int         `json:"status"`
-	Message      string      `json:"message"`
-	Record       interface{} `json:"record"`
-	Paito_minggu interface{} `json:"paito_minggu"`
-	Paito_senin  interface{} `json:"paito_senin"`
-	Paito_selasa interface{} `json:"paito_selasa"`
-	Paito_rabu   interface{} `json:"paito_rabu"`
-	Paito_kamis  interface{} `json:"paito_kamis"`
-	Paito_jumat  interface{} `json:"paito_jumat"`
-	Paito_sabtu  interface{} `json:"paito_sabtu"`
-	Time         string      `json:"time"`
+	Status        int         `json:"status"`
+	Message       string      `json:"message"`
+	Pasaran       string      `json:"pasaran_nama"`
+	Livedraw      string      `json:"pasaran_livedraw"`
+	Pasarandiundi string      `json:"pasaran_diundi"`
+	Pasaranjadwal string      `json:"pasaran_jadwal"`
+	Pasaran_title string      `json:"pasaran_title"`
+	Pasaran_descp string      `json:"pasaran_descp"`
+	Record        interface{} `json:"record"`
+	Paito_minggu  interface{} `json:"paito_minggu"`
+	Paito_senin   interface{} `json:"paito_senin"`
+	Paito_selasa  interface{} `json:"paito_selasa"`
+	Paito_rabu    interface{} `json:"paito_rabu"`
+	Paito_kamis   interface{} `json:"paito_kamis"`
+	Paito_jumat   interface{} `json:"paito_jumat"`
+	Paito_sabtu   interface{} `json:"paito_sabtu"`
+	Time          string      `json:"time"`
 }
 type Responsemobilemovie struct {
 	Status  int         `json:"status"`

@@ -7,6 +7,9 @@ type Model_pasaran struct {
 	Pasaran_diundi        string `json:"pasaran_diundi"`
 	Pasaran_jamjadwal     string `json:"pasaran_jamjadwal"`
 	Pasaran_datekeluaran  string `json:"pasaran_datekeluaran"`
+	Pasaran_slug          string `json:"pasaran_slug"`
+	Pasaran_meta_title    string `json:"pasaran_meta_title"`
+	Pasaran_meta_descp    string `json:"pasaran_meta_descp"`
 	Pasaran_keluaran      string `json:"pasaran_keluaran"`
 	Pasaran_dateprediksi  string `json:"pasaran_dateprediksi"`
 	Pasaran_bbfsprediksi  string `json:"pasaran_bbfsprediksi"`
