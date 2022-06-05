@@ -26,6 +26,14 @@ type ResponseKeluaran struct {
 	List_pasaran  interface{} `json:"list_pasaran"`
 	Time          string      `json:"time"`
 }
+type Responseproviderslot struct {
+	Status             int    `json:"status"`
+	Message            string `json:"message"`
+	Providerslot_name  string `json:"providerslot_name"`
+	Providerslot_image string `json:"providerslot_image"`
+	Providerslot_title string `json:"providerslot_title"`
+	Providerslot_descp string `json:"providerslot_descp"`
+}
 type Responsemobilemovie struct {
 	Status  int         `json:"status"`
 	Message string      `json:"message"`
