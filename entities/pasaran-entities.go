@@ -46,7 +46,9 @@ type Model_keluaranpaitojumat struct {
 type Model_keluaranpaitosabtu struct {
 	Keluaran_nomor interface{} `json:"keluaran_nomor"`
 }
-
+type Controller_pasaran struct {
+	Client_hostname string `json:"client_hostname" validate:"required"`
+}
 type Controller_keluaran struct {
 	Pasaran_id string `json:"pasaran_id" validate:"required"`
 }

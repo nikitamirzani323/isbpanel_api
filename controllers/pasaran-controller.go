@@ -16,6 +16,8 @@ const Field_home_redis = "LISTPASARAN_FRONTEND_ISBPANEL"
 const Field_keluaran_redis = "LISTKELUARAN_FRONTEND_ISBPANEL"
 
 func Pasaranhome(c *fiber.Ctx) error {
+	client_origin := c.Get("Origin")
+	log.Println("Pasaran Client origin : ", client_origin)
 	var obj entities.Model_pasaran
 	var arraobj []entities.Model_pasaran
 	render_page := time.Now()

@@ -8,6 +8,7 @@ import (
 	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/helpers"
 	"bitbucket.org/isbtotogroup/isbpanel_api_frontend/models"
 	"github.com/buger/jsonparser"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -15,12 +16,38 @@ const Field_bukumimpihome_redis = "LISTBUKUMIMPI_FRONTEND_ISBPANEL"
 const Field_tafsirmimpihome_redis = "LISTTAFSIRMIMPI_FRONTEND_ISBPANEL"
 
 func Bukumimpihome(c *fiber.Ctx) error {
-	hostname := c.Hostname()
-	log.Println(hostname)
+	var errors []*helpers.ErrorResponse
 	client := new(entities.Controller_clienrequest)
+	validate := validator.New()
 	if err := c.BodyParser(client); err != nil {
-		return err
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
 	}
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+	client_origin := c.Request().Body()
+	data_origin := []byte(client_origin)
+	hostname, _ := jsonparser.GetString(data_origin, "client_hostname")
+	log.Println("BUKU MIMPI Client origin : ", hostname)
+	log.Println("Tipe : ", client.Tipe)
+	log.Println("Nama : ", client.Nama)
 	var obj entities.Model_bukumimpi
 	var arraobj []entities.Model_bukumimpi
 	render_page := time.Now()

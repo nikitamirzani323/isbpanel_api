@@ -14,8 +14,9 @@ type Model_tafsirmimpi struct {
 }
 
 type Controller_clienrequest struct {
-	Tipe string `json:"tipe"`
-	Nama string `json:"nama"`
+	Client_hostname string `json:"client_hostname" validate:"required"`
+	Tipe            string `json:"tipe"`
+	Nama            string `json:"nama"`
 }
 type Controller_clientafsirmimpirequest struct {
 	Search string `json:"search"`
