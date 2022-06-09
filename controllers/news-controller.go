@@ -15,6 +15,22 @@ const Fieldnews_home_redis = "LISTNEWS_FRONTEND_ISBPANEL"
 const Fieldnewsmovie_home_redis = "LISTNEWSMOVIES_FRONTEND_ISBPANEL"
 
 func Newshome(c *fiber.Ctx) error {
+	client_origin := c.Request().Body()
+	data_origin := []byte(client_origin)
+	hostname, _ := jsonparser.GetString(data_origin, "client_hostname")
+	log.Println("Request Body : ", string(data_origin))
+	log.Println("NEWS Client origin : ", hostname)
+	flag_client := _domainsecurity(hostname)
+	log.Println("STATUS DOMAIN : ", flag_client)
+	if !flag_client {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "NOT REGISTER",
+			"record":  nil,
+		})
+	}
+
 	var obj entities.Model_news
 	var arraobj []entities.Model_news
 	render_page := time.Now()
@@ -58,6 +74,21 @@ func Newshome(c *fiber.Ctx) error {
 	}
 }
 func Newsmoviehome(c *fiber.Ctx) error {
+	client_origin := c.Request().Body()
+	data_origin := []byte(client_origin)
+	hostname, _ := jsonparser.GetString(data_origin, "client_hostname")
+	log.Println("Request Body : ", string(data_origin))
+	log.Println("MOVIE Client origin : ", hostname)
+	flag_client := _domainsecurity(hostname)
+	log.Println("STATUS DOMAIN : ", flag_client)
+	if !flag_client {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "NOT REGISTER",
+			"record":  nil,
+		})
+	}
 	var obj entities.Model_news
 	var arraobj []entities.Model_news
 	render_page := time.Now()

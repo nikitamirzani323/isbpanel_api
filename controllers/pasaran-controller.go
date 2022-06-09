@@ -12,12 +12,27 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+const fielddomain_redis = "LISTDOMAIN"
 const Field_home_redis = "LISTPASARAN_FRONTEND_ISBPANEL"
 const Field_keluaran_redis = "LISTKELUARAN_FRONTEND_ISBPANEL"
 
 func Pasaranhome(c *fiber.Ctx) error {
-	client_origin := c.Get("Origin")
-	log.Println("Pasaran Client origin : ", client_origin)
+	client_origin := c.Request().Body()
+	data_origin := []byte(client_origin)
+	hostname, _ := jsonparser.GetString(data_origin, "client_hostname")
+	log.Println("Request Body : ", string(data_origin))
+	log.Println("PASARAN Client origin : ", hostname)
+	flag_client := _domainsecurity(hostname)
+	log.Println("STATUS DOMAIN : ", flag_client)
+	if !flag_client {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "NOT REGISTER",
+			"record":  nil,
+		})
+	}
+
 	var obj entities.Model_pasaran
 	var arraobj []entities.Model_pasaran
 	render_page := time.Now()
@@ -104,6 +119,22 @@ func Keluaranhome(c *fiber.Ctx) error {
 			"status":  fiber.StatusBadRequest,
 			"message": "validation",
 			"record":  errors,
+		})
+	}
+
+	client_origin := c.Request().Body()
+	data_origin := []byte(client_origin)
+	hostname, _ := jsonparser.GetString(data_origin, "client_hostname")
+	log.Println("Request Body : ", string(data_origin))
+	log.Println("KELUARAN Client origin : ", hostname)
+	flag_client := _domainsecurity(hostname)
+	log.Println("STATUS DOMAIN : ", flag_client)
+	if !flag_client {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "NOT REGISTER",
+			"record":  nil,
 		})
 	}
 
@@ -235,4 +266,31 @@ func Keluaranhome(c *fiber.Ctx) error {
 			"time":             time.Since(render_page).String(),
 		})
 	}
+}
+func _domainsecurity(nmdomain string) bool {
+	log.Printf("Domain Client : %s", nmdomain)
+	resultredis, flag_domain := helpers.GetRedis(fielddomain_redis)
+	flag := false
+	if len(nmdomain) > 0 {
+		if !flag_domain {
+			result, temp_flag, err := models.Get_AllDomain(nmdomain)
+			if err != nil {
+				flag = false
+			}
+			log.Println("DOMAIN MYSQL")
+			helpers.SetRedis(fielddomain_redis, result, 24*time.Hour)
+			flag = temp_flag
+		} else {
+			jsonredis_domain := []byte(resultredis)
+			record_RD, _, _, _ := jsonparser.Get(jsonredis_domain, "record")
+			jsonparser.ArrayEach(record_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+				domain, _ := jsonparser.GetString(value, "domain_name")
+				if nmdomain == domain {
+					flag = true
+					log.Println("DOMAIN CACHE")
+				}
+			})
+		}
+	}
+	return flag
 }

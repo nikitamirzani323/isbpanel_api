@@ -42,12 +42,24 @@ func Bukumimpihome(c *fiber.Ctx) error {
 			"record":  errors,
 		})
 	}
+
 	client_origin := c.Request().Body()
 	data_origin := []byte(client_origin)
 	hostname, _ := jsonparser.GetString(data_origin, "client_hostname")
-	log.Println("BUKU MIMPI Client origin : ", hostname)
-	log.Println("Tipe : ", client.Tipe)
-	log.Println("Nama : ", client.Nama)
+	log.Println("Request Body : ", string(data_origin))
+	log.Println("BUKUMIMPI Client origin : ", hostname)
+
+	flag_client := _domainsecurity(hostname)
+	log.Println("STATUS DOMAIN : ", flag_client)
+	if !flag_client {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "NOT REGISTER",
+			"record":  nil,
+		})
+	}
+
 	var obj entities.Model_bukumimpi
 	var arraobj []entities.Model_bukumimpi
 	render_page := time.Now()
@@ -93,6 +105,23 @@ func TafsirMimpihome(c *fiber.Ctx) error {
 	if err := c.BodyParser(client); err != nil {
 		return err
 	}
+
+	client_origin := c.Request().Body()
+	data_origin := []byte(client_origin)
+	hostname, _ := jsonparser.GetString(data_origin, "client_hostname")
+	log.Println("Request Body : ", string(data_origin))
+	log.Println("TAFSIR MIMPI Client origin : ", hostname)
+	flag_client := _domainsecurity(hostname)
+	log.Println("STATUS DOMAIN : ", flag_client)
+	if !flag_client {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "NOT REGISTER",
+			"record":  nil,
+		})
+	}
+
 	var obj entities.Model_tafsirmimpi
 	var arraobj []entities.Model_tafsirmimpi
 	render_page := time.Now()

@@ -16,6 +16,22 @@ const Fieldproviderslot_home_redis = "LISTPROVIDERSLOT_FRONTEND_ISBPANEL"
 const Fieldprediksislot_home_redis = "LISTPREDIKSISLOT_FRONTEND_ISBPANEL"
 
 func Providerslothome(c *fiber.Ctx) error {
+	client_origin := c.Request().Body()
+	data_origin := []byte(client_origin)
+	hostname, _ := jsonparser.GetString(data_origin, "client_hostname")
+	log.Println("Request Body : ", string(data_origin))
+	log.Println("SLOT Client origin : ", hostname)
+	flag_client := _domainsecurity(hostname)
+	log.Println("STATUS DOMAIN : ", flag_client)
+	if !flag_client {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "NOT REGISTER",
+			"record":  nil,
+		})
+	}
+
 	var obj entities.Model_providerslot
 	var arraobj []entities.Model_providerslot
 	render_page := time.Now()
@@ -89,6 +105,22 @@ func Prediksislotdetail(c *fiber.Ctx) error {
 		})
 	}
 
+	client_origin := c.Request().Body()
+	data_origin := []byte(client_origin)
+	hostname, _ := jsonparser.GetString(data_origin, "client_hostname")
+	log.Println("Request Body : ", string(data_origin))
+	log.Println("PREDIKSI SLOT Client origin : ", hostname)
+	flag_client := _domainsecurity(hostname)
+	log.Println("STATUS DOMAIN : ", flag_client)
+	if !flag_client {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "NOT REGISTER",
+			"record":  nil,
+		})
+	}
+
 	field_redis := Fieldproviderslot_home_redis + "_" + client.Providerslot_slug
 	resultredis, flag := helpers.GetRedis(field_redis)
 	jsonredis := []byte(resultredis)
@@ -151,7 +183,21 @@ func Prediksislothome(c *fiber.Ctx) error {
 			"record":  errors,
 		})
 	}
-
+	client_origin := c.Request().Body()
+	data_origin := []byte(client_origin)
+	hostname, _ := jsonparser.GetString(data_origin, "client_hostname")
+	log.Println("Request Body : ", string(data_origin))
+	log.Println("PREDIKSI SLOT DASHBOARD Client origin : ", hostname)
+	flag_client := _domainsecurity(hostname)
+	log.Println("STATUS DOMAIN : ", flag_client)
+	if !flag_client {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "NOT REGISTER",
+			"record":  nil,
+		})
+	}
 	var obj entities.Model_prediksislot
 	var arraobj []entities.Model_prediksislot
 	render_page := time.Now()

@@ -63,16 +63,16 @@ func Moviehome(c *fiber.Ctx) error {
 	log.Println("Client TOKEN : ", temp_decp)
 	log.Println("Client BODYPARSE : ", client.Client_hostname)
 
-	flag_client := models.Get_Domain(temp_decp)
+	// flag_client := models.Get_Domain(temp_decp)
 
-	if !flag_client {
-		c.Status(fiber.StatusBadRequest)
-		return c.JSON(fiber.Map{
-			"status":  fiber.StatusBadRequest,
-			"message": "NOT REGISTER",
-			"record":  nil,
-		})
-	}
+	// if !flag_client {
+	// 	c.Status(fiber.StatusBadRequest)
+	// 	return c.JSON(fiber.Map{
+	// 		"status":  fiber.StatusBadRequest,
+	// 		"message": "NOT REGISTER",
+	// 		"record":  nil,
+	// 	})
+	// }
 	var obj entities.Model_moviecategory
 	var arraobj []entities.Model_moviecategory
 	render_page := time.Now()
@@ -171,15 +171,15 @@ func Movieseason(c *fiber.Ctx) error {
 	temp_decp := helpers.Decryption(name)
 	log.Println("Client TOKEN : ", temp_decp)
 	log.Println("Client BODYPARSE : ", client.Client_hostname)
-	flag_client := models.Get_Domain(temp_decp)
-	if !flag_client {
-		c.Status(fiber.StatusBadRequest)
-		return c.JSON(fiber.Map{
-			"status":  fiber.StatusBadRequest,
-			"message": "NOT REGISTER",
-			"record":  nil,
-		})
-	}
+	// flag_client := models.Get_Domain(temp_decp)
+	// if !flag_client {
+	// 	c.Status(fiber.StatusBadRequest)
+	// 	return c.JSON(fiber.Map{
+	// 		"status":  fiber.StatusBadRequest,
+	// 		"message": "NOT REGISTER",
+	// 		"record":  nil,
+	// 	})
+	// }
 
 	var obj entities.Model_movieseason
 	var arraobj []entities.Model_movieseason
@@ -253,15 +253,6 @@ func Movieepisode(c *fiber.Ctx) error {
 	temp_decp := helpers.Decryption(name)
 	log.Println("Client TOKEN : ", temp_decp)
 	log.Println("Client BODYPARSE : ", client.Client_hostname)
-	flag_client := models.Get_Domain(temp_decp)
-	if !flag_client {
-		c.Status(fiber.StatusBadRequest)
-		return c.JSON(fiber.Map{
-			"status":  fiber.StatusBadRequest,
-			"message": "NOT REGISTER",
-			"record":  nil,
-		})
-	}
 
 	var obj entities.Model_movieepisode
 	var arraobj []entities.Model_movieepisode
