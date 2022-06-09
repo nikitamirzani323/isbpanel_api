@@ -5,6 +5,7 @@ const (
 	DB_tbl_admin              string = "tbl_admin"
 	DB_tbl_admingroup         string = "tbl_admingroup"
 	DB_tbl_mst_version        string = "tbl_mst_version"
+	DB_tbl_mst_banner         string = "tbl_mst_banner"
 	DB_tbl_mst_domain         string = "tbl_mst_domain"
 	DB_tbl_mst_providerslot   string = "tbl_mst_providerslot"
 	DB_tbl_mst_mediatable     string = "tbl_mst_mediatable"

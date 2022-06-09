@@ -14,7 +14,7 @@ type Model_tafsirmimpi struct {
 }
 
 type Controller_clienrequest struct {
-	Device_client string `json:"device_client"`
+	Client_Device string `json:"client_device"`
 	Tipe          string `json:"tipe"`
 	Nama          string `json:"nama"`
 }
