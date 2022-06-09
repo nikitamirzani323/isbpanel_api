@@ -12,7 +12,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-const fielddomain_redis = "LISTDOMAIN"
+const fielddomain_redis = "LISTDOMAIN_FRONTEND_ISBPANEL"
 const Field_home_redis = "LISTPASARAN_FRONTEND_ISBPANEL"
 const Field_keluaran_redis = "LISTKELUARAN_FRONTEND_ISBPANEL"
 
