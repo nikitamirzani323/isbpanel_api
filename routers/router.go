@@ -21,7 +21,7 @@ func Init() *fiber.App {
 		Next: func(c *fiber.Ctx) bool {
 			return c.IP() == "127.0.0.1"
 		},
-		Max:        20,
+		Max:        200,
 		Expiration: 20 * time.Second,
 		LimitReached: func(c *fiber.Ctx) error {
 			return c.JSON(fiber.Map{
