@@ -21,7 +21,7 @@ func Get_AllBanner() (helpers.Response, error) {
 	con := db.CreateCon()
 
 	sql_select := `SELECT
-		urlbanner, posisibanner, devicebanner   
+		urlbanner, urlwebsite, posisibanner, devicebanner   
 		FROM ` + config.DB_tbl_mst_banner + `  
 		WHERE statusbanner = 'Y'
 		ORDER BY displaybanner 
@@ -31,12 +31,13 @@ func Get_AllBanner() (helpers.Response, error) {
 	helpers.ErrorCheck(err)
 
 	for row.Next() {
-		var urlbanner_db, posisibanner_db, devicebanner_db string
-		err = row.Scan(&urlbanner_db, &posisibanner_db, &devicebanner_db)
+		var urlbanner_db, urlwebsite_db, posisibanner_db, devicebanner_db string
+		err = row.Scan(&urlbanner_db, &urlwebsite_db, &posisibanner_db, &devicebanner_db)
 		if err != nil {
 			return res, err
 		}
 		obj.Banner_url = urlbanner_db
+		obj.Banner_urlwebsite = urlwebsite_db
 		obj.Banner_posisi = posisibanner_db
 		obj.Banner_device = devicebanner_db
 		arraobj = append(arraobj, obj)

@@ -67,10 +67,12 @@ func Bannerhome(c *fiber.Ctx) error {
 	record_RD, _, _, _ := jsonparser.Get(jsonredis, "record")
 	jsonparser.ArrayEach(record_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		banner_url, _ := jsonparser.GetString(value, "banner_url")
+		banner_urlwebsite, _ := jsonparser.GetString(value, "banner_urlwebsite")
 		banner_posisi, _ := jsonparser.GetString(value, "banner_posisi")
 		banner_device, _ := jsonparser.GetString(value, "banner_device")
 
 		obj.Banner_url = banner_url
+		obj.Banner_urlwebsite = banner_urlwebsite
 		obj.Banner_device = banner_device
 		obj.Banner_posisi = banner_posisi
 		arraobj = append(arraobj, obj)
