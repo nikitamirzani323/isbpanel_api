@@ -32,7 +32,6 @@ func Init() *fiber.App {
 		},
 	}))
 	app.Post("/api/init", controllers.CheckLogin)
-	app.Post("/api/home", middleware.JWTProtected(), controllers.Home)
 	app.Post("/api/banner", controllers.Bannerhome)
 	app.Post("/api/pasaran", controllers.Pasaranhome)
 	app.Post("/api/keluaran", controllers.Keluaranhome)
@@ -44,6 +43,7 @@ func Init() *fiber.App {
 	app.Post("/api/providerslotdetail", controllers.Prediksislotdetail)
 	app.Post("/api/prediksislot", controllers.Prediksislothome)
 
+	app.Post("/api/home", middleware.JWTProtected(), controllers.Home)
 	app.Post("/api/movie", middleware.JWTProtected(), controllers.Moviehome)
 	app.Post("/api/season", middleware.JWTProtected(), controllers.Movieseason)
 	app.Post("/api/episode", middleware.JWTProtected(), controllers.Movieepisode)

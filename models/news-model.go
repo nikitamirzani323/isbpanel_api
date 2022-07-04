@@ -25,7 +25,7 @@ func Fetch_newsHome() (helpers.Response, error) {
 		url_news , img_news 
 		FROM ` + config.DB_tbl_trx_news + ` 
 		WHERE idcatenews != '2112'  
-		ORDER BY idnews DESC LIMIT 5    
+		ORDER BY idnews DESC LIMIT 15     
 	`
 
 	row, err := con.QueryContext(ctx, sql_select)
@@ -69,7 +69,7 @@ func Fetch_newsMovieHome() (helpers.Response, error) {
 		url_news , img_news 
 		FROM ` + config.DB_tbl_trx_news + ` 
 		WHERE idcatenews = '2112'  
-		ORDER BY idnews DESC LIMIT 5   
+		ORDER BY idnews DESC LIMIT 15    
 	`
 
 	row, err := con.QueryContext(ctx, sql_select)
