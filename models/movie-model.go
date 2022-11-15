@@ -547,7 +547,7 @@ func Fetch_moviedetail(movieid int, username string) (helpers.Response, error) {
 		} else {
 			path_image = urlthumbnail_db
 		}
-		moviebanner := _GetBanner()
+		moviebanner, totalbanner := _GetBanner()
 		movie_url, totalsource, _ := _GetVideo(movieid_db, "")
 		_, _, movie_src := _GetVideo(movieid_db, "single")
 		genre := ""
@@ -580,6 +580,7 @@ func Fetch_moviedetail(movieid int, username string) (helpers.Response, error) {
 		obj.Movie_src = movie_src
 		obj.Movie_favorite = _GetFavorite(movieid_db, username)
 		obj.Movie_totalsource = totalsource
+		obj.Movie_totalbanner = totalbanner
 		obj.Movie_video = movie_url
 		obj.Movie_banner = moviebanner
 		arraobj = append(arraobj, obj)
@@ -1333,11 +1334,13 @@ func _GetFavorite(idrecord int, username string) string {
 	}
 	return favorite
 }
-func _GetBanner() interface{} {
+func _GetBanner() (interface{}, int) {
 	var obj entities.Model_moviebanner
 	var arraobj []entities.Model_moviebanner
 	con := db.CreateCon()
 	ctx := context.Background()
+	totalbanner := 0
+
 	sql_select := ""
 	sql_select += "SELECT "
 	sql_select += "urlimgmoviebanner,urldestinationmoviebanner "
@@ -1349,6 +1352,7 @@ func _GetBanner() interface{} {
 	row_select, err_select := con.QueryContext(ctx, sql_select)
 	helpers.ErrorCheck(err_select)
 	for row_select.Next() {
+		totalbanner = totalbanner + 1
 		var urlimg_db, urldestination string
 
 		err_select = row_select.Scan(&urlimg_db, &urldestination)
@@ -1357,5 +1361,5 @@ func _GetBanner() interface{} {
 		obj.Moviebanner_urldestination = urldestination
 		arraobj = append(arraobj, obj)
 	}
-	return arraobj
+	return arraobj, totalbanner
 }

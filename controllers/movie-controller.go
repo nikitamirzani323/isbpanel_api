@@ -445,6 +445,7 @@ func Moviedetailmobile(c *fiber.Ctx) error {
 		movie_img, _ := jsonparser.GetString(value, "movie_img")
 		movie_genre, _ := jsonparser.GetString(value, "movie_genre")
 		movie_totalsource, _ := jsonparser.GetInt(value, "movie_totalsource")
+		movie_totalbanner, _ := jsonparser.GetInt(value, "movie_totalbanner")
 
 		movie_video, _, _, _ := jsonparser.Get(value, "movie_video")
 		var objmoviesrc entities.Model_movievideo
@@ -480,6 +481,7 @@ func Moviedetailmobile(c *fiber.Ctx) error {
 		obj.Movie_video = arraobjmoviesrc
 		obj.Movie_banner = arraobjmoviebanner
 		obj.Movie_totalsource = int(movie_totalsource)
+		obj.Movie_totalbanner = int(movie_totalbanner)
 		arraobj = append(arraobj, obj)
 	})
 	if !flag {

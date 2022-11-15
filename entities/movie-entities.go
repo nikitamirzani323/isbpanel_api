@@ -54,6 +54,7 @@ type Model_moviedetail struct {
 	Movie_src         string      `json:"movie_src"`
 	Movie_favorite    string      `json:"movie_favorite"`
 	Movie_totalsource int         `json:"movie_totalsource"`
+	Movie_totalbanner int         `json:"movie_totalbanner"`
 	Movie_video       interface{} `json:"movie_video"`
 	Movie_banner      interface{} `json:"movie_banner"`
 }
