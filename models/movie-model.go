@@ -286,7 +286,7 @@ func EpisodeMovie(idseason int) (helpers.Response, error) {
 	return res, nil
 }
 
-//MOBILE
+// MOBILE
 func Fetch_movielist(tipe, username, search string) (helpers.Response, error) {
 	var obj entities.Model_movielist
 	var arraobj []entities.Model_movielist
@@ -547,6 +547,7 @@ func Fetch_moviedetail(movieid int, username string) (helpers.Response, error) {
 		} else {
 			path_image = urlthumbnail_db
 		}
+		moviebanner := _GetBanner()
 		movie_url, totalsource, _ := _GetVideo(movieid_db, "")
 		_, _, movie_src := _GetVideo(movieid_db, "single")
 		genre := ""
@@ -580,6 +581,7 @@ func Fetch_moviedetail(movieid int, username string) (helpers.Response, error) {
 		obj.Movie_favorite = _GetFavorite(movieid_db, username)
 		obj.Movie_totalsource = totalsource
 		obj.Movie_video = movie_url
+		obj.Movie_banner = moviebanner
 		arraobj = append(arraobj, obj)
 		msg = "Success"
 	}
@@ -1236,7 +1238,7 @@ func _GetVideo(idrecord int, tipe string) (interface{}, int, string) {
 	sql_select += "FROM " + config.DB_tbl_mst_movie_source + " "
 	sql_select += "WHERE poster_id = $1 "
 	if tipe == "single" {
-		sql_select += "ORDER BY RAND() DESC LIMIT 1 "
+		sql_select += "ORDER BY RANDOM() DESC LIMIT 1 "
 	}
 
 	row_select, err_select := con.QueryContext(ctx, sql_select, idrecord)
@@ -1330,4 +1332,30 @@ func _GetFavorite(idrecord int, username string) string {
 		helpers.ErrorCheck(e)
 	}
 	return favorite
+}
+func _GetBanner() interface{} {
+	var obj entities.Model_moviebanner
+	var arraobj []entities.Model_moviebanner
+	con := db.CreateCon()
+	ctx := context.Background()
+	sql_select := ""
+	sql_select += "SELECT "
+	sql_select += "urlimgmoviebanner,urldestinationmoviebanner "
+	sql_select += "FROM " + config.DB_tbl_trx_moviebanner + " "
+	sql_select += "WHERE statusmoviebanner = 'Y' "
+	sql_select += "AND devicemoviebanner = 'DEVICE' "
+	sql_select += "ORDER BY displaymoviebanner ASC "
+
+	row_select, err_select := con.QueryContext(ctx, sql_select)
+	helpers.ErrorCheck(err_select)
+	for row_select.Next() {
+		var urlimg_db, urldestination string
+
+		err_select = row_select.Scan(&urlimg_db, &urldestination)
+		helpers.ErrorCheck(err_select)
+		obj.Moviebanner_urlimg = urlimg_db
+		obj.Moviebanner_urldestination = urldestination
+		arraobj = append(arraobj, obj)
+	}
+	return arraobj
 }

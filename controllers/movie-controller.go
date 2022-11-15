@@ -295,7 +295,7 @@ func Movieepisode(c *fiber.Ctx) error {
 	}
 }
 
-//MOBILE
+// MOBILE
 func Moviemobile(c *fiber.Ctx) error {
 	var errors []*helpers.ErrorResponse
 	client := new(entities.Controller_clientmobilemovie)
@@ -455,6 +455,17 @@ func Moviedetailmobile(c *fiber.Ctx) error {
 			arraobjmoviesrc = append(arraobjmoviesrc, objmoviesrc)
 		})
 
+		movie_banner, _, _, _ := jsonparser.Get(value, "movie_banner")
+		var objmoviebanner entities.Model_moviebanner
+		var arraobjmoviebanner []entities.Model_moviebanner
+		jsonparser.ArrayEach(movie_banner, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+			moviebanner_urlimg, _ := jsonparser.GetString(value, "moviebanner_urlimg")
+			moviebanner_urldestination, _ := jsonparser.GetString(value, "moviebanner_urldestination")
+			objmoviebanner.Moviebanner_urlimg = moviebanner_urlimg
+			objmoviebanner.Moviebanner_urldestination = moviebanner_urldestination
+			arraobjmoviebanner = append(arraobjmoviebanner, objmoviebanner)
+		})
+
 		obj.Movie_id = int(movie_id)
 		obj.Movie_type = movie_type
 		obj.Movie_title = movie_title
@@ -467,6 +478,7 @@ func Moviedetailmobile(c *fiber.Ctx) error {
 		obj.Movie_src = movie_src
 		obj.Movie_favorite = movie_favorite
 		obj.Movie_video = arraobjmoviesrc
+		obj.Movie_banner = arraobjmoviebanner
 		obj.Movie_totalsource = int(movie_totalsource)
 		arraobj = append(arraobj, obj)
 	})

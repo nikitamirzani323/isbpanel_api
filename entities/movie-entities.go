@@ -13,6 +13,10 @@ type Model_movie struct {
 	Movie_thumbnail string      `json:"movie_thumbnail"`
 	Movie_video     interface{} `json:"movie_video"`
 }
+type Model_moviebanner struct {
+	Moviebanner_urlimg         string `json:"moviebanner_urlimg"`
+	Moviebanner_urldestination string `json:"moviebanner_urldestination"`
+}
 type Model_movievideo struct {
 	Movie_src string `json:"movie_src"`
 }
@@ -26,7 +30,7 @@ type Model_movieepisode struct {
 	Episode_src   string `json:"episode_src"`
 }
 
-//MOBILE
+// MOBILE
 type Model_movielist struct {
 	Movie_id    int    `json:"movie_id"`
 	Movie_type  string `json:"movie_type"`
@@ -51,6 +55,7 @@ type Model_moviedetail struct {
 	Movie_favorite    string      `json:"movie_favorite"`
 	Movie_totalsource int         `json:"movie_totalsource"`
 	Movie_video       interface{} `json:"movie_video"`
+	Movie_banner      interface{} `json:"movie_banner"`
 }
 type Model_mobilemoviecategory struct {
 	Movie_idcategory int         `json:"movie_idcategory"`

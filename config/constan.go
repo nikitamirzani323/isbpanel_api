@@ -29,6 +29,7 @@ const (
 	DB_tbl_trx_rate           string = "tbl_trx_rate"
 	DB_tbl_trx_user           string = "tbl_mst_user"
 	DB_tbl_trx_moviegenre     string = "tbl_trx_moviegenre"
+	DB_tbl_trx_moviebanner    string = "tbl_trx_moviebanner"
 	DB_tbl_trx_comment        string = "tbl_trx_comment"
 	DB_tbl_trx_favorite       string = "tbl_trx_favorite"
 	DB_VIEW_MOVIE             string = "VIEW_MOVIE"
