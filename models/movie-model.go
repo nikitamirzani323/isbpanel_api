@@ -1343,11 +1343,11 @@ func _GetBanner() (interface{}, int) {
 
 	sql_select := ""
 	sql_select += "SELECT "
-	sql_select += "urlimgmoviebanner,urldestinationmoviebanner "
-	sql_select += "FROM " + config.DB_tbl_trx_moviebanner + " "
-	sql_select += "WHERE statusmoviebanner = 'Y' "
-	sql_select += "AND devicemoviebanner = 'DEVICE' "
-	sql_select += "ORDER BY displaymoviebanner ASC "
+	sql_select += "urlbanner,urlwebsite "
+	sql_select += "FROM " + config.DB_tbl_mst_banner + " "
+	sql_select += "WHERE statusbanner = 'Y' "
+	sql_select += "AND devicebanner = 'DEVICE' "
+	sql_select += "ORDER BY displaybanner ASC "
 
 	row_select, err_select := con.QueryContext(ctx, sql_select)
 	helpers.ErrorCheck(err_select)
